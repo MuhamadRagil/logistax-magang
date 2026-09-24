@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F5F7FA; font-family: 'Plus Jakarta Sans', sans-serif; }
+    select { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</helmet>
+<div style="display:flex; min-height:100vh; width:100%; background:#F5F7FA;">
+
+  <div style="width:232px; flex-shrink:0; background:#FFFFFF; border-right:1px solid #E4E9F2; display:flex; flex-direction:column; padding:20px 14px;">
+    <div style="padding:6px 8px 20px 8px;"><img src="./assets/logistax-logo.png" alt="Logistax" style="height:26px; display:block;"></div>
+    <div style="display:flex; flex-direction:column; gap:2px;">
+      <a href="./Dashboard.dc.html" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; border-left:3px solid transparent; text-decoration:none;" style-hover="background:#F5F7FA;"><div style="width:8px; height:8px; border-radius:2px; background:#98A2B3;"></div><span style="font-size:14px; font-weight:600; color:#475467;">Dashboard</span></a>
+      <a href="#" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; background:#EEF2FB; border-left:3px solid #00A6C0; text-decoration:none;"><div style="width:8px; height:8px; border-radius:2px; background:#003087;"></div><span style="font-size:14px; font-weight:700; color:#003087;">Manajemen Intern</span></a>
+      <a href="./Absensi.dc.html" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; border-left:3px solid transparent; text-decoration:none;" style-hover="background:#F5F7FA;"><div style="width:8px; height:8px; border-radius:2px; background:#98A2B3;"></div><span style="font-size:14px; font-weight:600; color:#475467;">Absensi</span></a>
+      <a href="./Penilaian.dc.html" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; border-left:3px solid transparent; text-decoration:none;" style-hover="background:#F5F7FA;"><div style="width:8px; height:8px; border-radius:2px; background:#98A2B3;"></div><span style="font-size:14px; font-weight:600; color:#475467;">Penilaian</span></a>
+      <a href="./Sertifikat%20dan%20Laporan.dc.html" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; border-left:3px solid transparent; text-decoration:none;" style-hover="background:#F5F7FA;"><div style="width:8px; height:8px; border-radius:2px; background:#98A2B3;"></div><span style="font-size:14px; font-weight:600; color:#475467;">Sertifikat &amp; Laporan</span></a>
+    </div>
+    <div style="margin-top:auto; padding-top:16px; border-top:1px solid #E4E9F2;">
+      <a href="#" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; text-decoration:none;" style-hover="background:#F5F7FA;"><div style="width:8px; height:8px; border-radius:2px; background:#98A2B3;"></div><span style="font-size:14px; font-weight:600; color:#475467;">Logout</span></a>
+    </div>
+  </div>
+
+  <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+    <div style="height:64px; flex-shrink:0; background:#FFFFFF; border-bottom:1px solid #E4E9F2; display:flex; align-items:center; justify-content:space-between; padding:0 28px;">
+      <div style="font-size:18px; font-weight:800; color:#16213D;">Manajemen Intern</div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div style="position:relative; cursor:pointer;">
+          <div style="width:36px; height:36px; border-radius:50%; background:#F5F7FA; display:flex; align-items:center; justify-content:center;"><div style="width:16px; height:16px; border:1.5px solid #475467; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div></div>
+          <div style="position:absolute; top:-2px; right:-2px; width:9px; height:9px; border-radius:50%; background:#DC2626; border:1.5px solid #FFFFFF;"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; border-left:1px solid #E4E9F2; padding-left:16px;">
+          <div style="width:36px; height:36px; border-radius:50%; background:#003087; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">DA</div>
+          <div><div style="font-size:13.5px; font-weight:700; color:#16213D; line-height:1.2;">Dewi Anggraini</div><div style="font-size:11px; font-weight:700; color:#003087; background:#EEF2FB; padding:1px 8px; border-radius:6px; display:inline-block; margin-top:2px;">Admin Magang</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1; padding:28px; overflow:auto;">
+
+      <div style="display:flex; gap:6px; margin-bottom:20px;">
+        <button onClick="{{ goList }}" style="padding:10px 18px; border-radius:8px 8px 0 0; border:none; border-bottom:2.5px solid {{ tabListBorder }}; background:none; font-size:14px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; color:{{ tabListColor }}; cursor:pointer;">Daftar Intern</button>
+        <button onClick="{{ goPending }}" style="padding:10px 18px; border-radius:8px 8px 0 0; border:none; border-bottom:2.5px solid {{ tabPendingBorder }}; background:none; font-size:14px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; color:{{ tabPendingColor }}; cursor:pointer; display:flex; align-items:center; gap:8px;">
+          Pending Registrasi
+          <span style="background:#FEE2E2; color:#B91C1C; font-size:11px; font-weight:800; padding:1px 8px; border-radius:100px;">{{ pendingCount }}</span>
+        </button>
+      </div>
+
+      <sc-if value="{{ isListTab }}">
+        <div style="background:#FFFFFF; border:1px solid #E4E9F2; border-radius:12px; padding:18px 20px; margin-bottom:18px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <input placeholder="Cari nama atau NIM..." style="flex:1; min-width:200px; padding:10px 14px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; font-family:'Plus Jakarta Sans',sans-serif; outline:none;" style-focus="border-color:#00A6C0;">
+          <select style="padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; color:#475467; outline:none;"><option>Semua Divisi</option><option>Pajak Korporat</option><option>Audit Internal</option><option>Konsultasi Pajak</option><option>Legal &amp; Compliance</option></select>
+          <select style="padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; color:#475467; outline:none;"><option>Semua Status</option><option>Pending</option><option>Active</option><option>Completed</option><option>Failed</option><option>Extended</option></select>
+          <select style="padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; color:#475467; outline:none;"><option>Semua Institusi</option><option>Universitas Indonesia</option><option>Institut Teknologi Bandung</option><option>Universitas Padjadjaran</option></select>
+          <button onClick="{{ openAddForm }}" style="padding:10px 18px; background:#003087; color:#FFFFFF; border:none; border-radius:8px; font-size:13.5px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; white-space:nowrap;" style-hover="background:#001F5C;">+ Tambah Intern</button>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #E4E9F2; border-radius:12px; overflow:hidden;">
+          <div style="display:grid; grid-template-columns:2.3fr 1.1fr 1.6fr 1.4fr 1.3fr 1.4fr 1fr 0.8fr; padding:14px 20px; background:#F9FAFC; border-bottom:1px solid #E4E9F2; font-size:11.5px; font-weight:700; color:#98A2B3; text-transform:uppercase; letter-spacing:0.03em;">
+            <div>Nama</div><div>NIM</div><div>Institusi</div><div>Divisi</div><div>Mentor</div><div>Periode</div><div>Status</div><div>Aksi</div>
+          </div>
+          <sc-for list="{{ interns }}" as="row" hint-placeholder-count="8">
+            <div style="display:grid; grid-template-columns:2.3fr 1.1fr 1.6fr 1.4fr 1.3fr 1.4fr 1fr 0.8fr; padding:14px 20px; border-bottom:1px solid #F0F2F6; align-items:center;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:32px; height:32px; border-radius:50%; background:{{ row.avatarColor }}; color:#FFFFFF; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">{{ row.initials }}</div>
+                <span style="font-size:13.5px; font-weight:700; color:#16213D;">{{ row.name }}</span>
+              </div>
+              <div style="font-size:13px; color:#475467;">{{ row.nim }}</div>
+              <div style="font-size:13px; color:#475467;">{{ row.institution }}</div>
+              <div style="font-size:13px; color:#475467;">{{ row.division }}</div>
+              <div style="font-size:13px; color:#475467;">{{ row.mentor }}</div>
+              <div style="font-size:12.5px; color:#667085;">{{ row.period }}</div>
+              <div><span style="font-size:12px; font-weight:700; color:{{ row.statusColor }}; background:{{ row.statusBg }}; padding:4px 10px; border-radius:100px; display:inline-block;">{{ row.statusLabel }}</span></div>
+              <div style="display:flex; gap:8px;">
+                <button onClick="{{ row.onView }}" style="border:1px solid #E4E9F2; background:#FFFFFF; border-radius:6px; padding:5px 9px; font-size:11.5px; font-weight:700; color:#003087; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">Lihat</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPendingTab }}">
+        <div style="background:#FFFFFF; border:1px solid #E4E9F2; border-radius:12px; overflow:hidden;">
+          <div style="display:grid; grid-template-columns:2fr 1.1fr 1.6fr 1.4fr 1.4fr 1.4fr; padding:14px 20px; background:#F9FAFC; border-bottom:1px solid #E4E9F2; font-size:11.5px; font-weight:700; color:#98A2B3; text-transform:uppercase; letter-spacing:0.03em;">
+            <div>Nama</div><div>NIM</div><div>Institusi</div><div>Divisi Diajukan</div><div>Tanggal Daftar</div><div>Aksi</div>
+          </div>
+          <sc-for list="{{ pendingRegs }}" as="row" hint-placeholder-count="3">
+            <div style="display:grid; grid-template-columns:2fr 1.1fr 1.6fr 1.4fr 1.4fr 1.4fr; padding:14px 20px; border-bottom:1px solid #F0F2F6; align-items:center;">
+              <div style="display:flex; align-items:center; gap:10px;"><div style="width:32px; height:32px; border-radius:50%; background:{{ row.avatarColor }}; color:#FFFFFF; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">{{ row.initials }}</div><span style="font-size:13.5px; font-weight:700; color:#16213D;">{{ row.name }}</span></div>
+              <div style="font-size:13px; color:#475467;">{{ row.nim }}</div>
+              <div style="font-size:13px; color:#475467;">{{ row.institution }}</div>
+              <div style="font-size:13px; color:#475467;">{{ row.division }}</div>
+              <div style="font-size:12.5px; color:#667085;">{{ row.registeredAt }}</div>
+              <div style="display:flex; gap:8px;">
+                <button onClick="{{ row.onApprove }}" style="border:none; background:#DCFCE7; color:#15803D; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">Approve</button>
+                <button onClick="{{ row.onReject }}" style="border:none; background:#FEE2E2; color:#B91C1C; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">Reject</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ showReject }}">
+    <div style="position:fixed; inset:0; background:rgba(16,24,40,0.5); display:flex; align-items:center; justify-content:center; z-index:50;">
+      <div style="background:#FFFFFF; border-radius:14px; width:440px; padding:26px;">
+        <div style="font-size:16px; font-weight:800; color:#16213D;">Tolak Registrasi</div>
+        <div style="font-size:13px; color:#667085; margin-top:4px;">Alasan wajib diisi untuk {{ rejectingName }}.</div>
+        <textarea placeholder="Tulis alasan penolakan..." value="{{ rejectReason }}" onChange="{{ onRejectReasonChange }}" style="width:100%; box-sizing:border-box; margin-top:16px; padding:12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; font-family:'Plus Jakarta Sans',sans-serif; min-height:90px; outline:none; resize:vertical;" style-focus="border-color:#00A6C0;"></textarea>
+        <div style="display:flex; gap:10px; margin-top:18px; justify-content:flex-end;">
+          <button onClick="{{ closeReject }}" style="padding:10px 18px; border-radius:8px; border:1px solid #E4E9F2; background:#FFFFFF; color:#475467; font-size:13.5px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer;">Batal</button>
+          <button onClick="{{ confirmReject }}" style="padding:10px 18px; border-radius:8px; border:none; background:#DC2626; color:#FFFFFF; font-size:13.5px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer;">Tolak Registrasi</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showAdd }}">
+    <div style="position:fixed; inset:0; background:rgba(16,24,40,0.5); display:flex; align-items:center; justify-content:center; z-index:50;">
+      <div style="background:#FFFFFF; border-radius:14px; width:560px; max-height:88vh; overflow:auto; padding:26px;">
+        <div style="font-size:16px; font-weight:800; color:#16213D; margin-bottom:18px;">Tambah Intern Baru</div>
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+          <div style="width:64px; height:64px; border-radius:50%; background:#F5F7FA; border:1.5px dashed #C6CDDA; display:flex; align-items:center; justify-content:center; font-size:10px; color:#98A2B3; text-align:center; flex-shrink:0;">FOTO</div>
+          <button style="padding:8px 14px; border-radius:8px; border:1px solid #E4E9F2; background:#FFFFFF; color:#475467; font-size:12.5px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer;">Upload Foto</button>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div style="grid-column:1/-1;"><label style="display:block; font-size:12.5px; font-weight:700; color:#16213D; margin-bottom:5px;">Nama Lengkap</label><input placeholder="Nama intern" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; font-family:'Plus Jakarta Sans',sans-serif; outline:none;"></div>
+          <div><label style="display:block; font-size:12.5px; font-weight:700; color:#16213D; margin-bottom:5px;">NIM</label><input placeholder="NIM" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; font-family:'Plus Jakarta Sans',sans-serif; outline:none;"></div>
+          <div><label style="display:block; font-size:12.5px; font-weight:700; color:#16213D; margin-bottom:5px;">Institusi</label><input placeholder="Universitas" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; font-family:'Plus Jakarta Sans',sans-serif; outline:none;"></div>
+          <div style="grid-column:1/-1;"><label style="display:block; font-size:12.5px; font-weight:700; color:#16213D; margin-bottom:5px;">Jurusan</label><input placeholder="Program studi" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; font-family:'Plus Jakarta Sans',sans-serif; outline:none;"></div>
+          <div><label style="display:block; font-size:12.5px; font-weight:700; color:#16213D; margin-bottom:5px;">Tanggal Mulai</label><input type="date" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; font-family:'Plus Jakarta Sans',sans-serif; outline:none;"></div>
+          <div><label style="display:block; font-size:12.5px; font-weight:700; color:#16213D; margin-bottom:5px;">Tanggal Selesai</label><input type="date" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; font-family:'Plus Jakarta Sans',sans-serif; outline:none;"></div>
+          <div><label style="display:block; font-size:12.5px; font-weight:700; color:#16213D; margin-bottom:5px;">Divisi</label><select style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; outline:none;"><option>Pajak Korporat</option><option>Audit Internal</option><option>Konsultasi Pajak</option><option>Legal &amp; Compliance</option></select></div>
+          <div><label style="display:block; font-size:12.5px; font-weight:700; color:#16213D; margin-bottom:5px;">Mentor</label><select style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #E4E9F2; border-radius:8px; font-size:13.5px; outline:none;"><option>A. Reza Somana</option><option>Nina Kartika</option><option>Dimas Prasetyo</option></select></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:22px; justify-content:flex-end;">
+          <button onClick="{{ closeAdd }}" style="padding:10px 18px; border-radius:8px; border:1px solid #E4E9F2; background:#FFFFFF; color:#475467; font-size:13.5px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer;">Batal</button>
+          <button onClick="{{ closeAdd }}" style="padding:10px 18px; border-radius:8px; border:none; background:#003087; color:#FFFFFF; font-size:13.5px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer;">Simpan Intern</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showDetail }}">
+    <div style="position:fixed; inset:0; background:rgba(16,24,40,0.5); display:flex; align-items:center; justify-content:center; z-index:50;">
+      <div style="background:#FFFFFF; border-radius:14px; width:640px; max-height:88vh; overflow:auto; padding:28px;">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+          <div style="display:flex; gap:16px;">
+            <div style="width:64px; height:64px; border-radius:50%; background:{{ detailIntern.avatarColor }}; color:#FFFFFF; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">{{ detailIntern.initials }}</div>
+            <div>
+              <div style="font-size:18px; font-weight:800; color:#16213D;">{{ detailIntern.name }}</div>
+              <div style="font-size:13px; color:#667085; margin-top:2px;">{{ detailIntern.nim }} · {{ detailIntern.institution }}</div>
+              <span style="font-size:12px; font-weight:700; color:{{ detailIntern.statusColor }}; background:{{ detailIntern.statusBg }}; padding:3px 10px; border-radius:100px; display:inline-block; margin-top:8px;">{{ detailIntern.statusLabel }}</span>
+            </div>
+          </div>
+          <button onClick="{{ closeDetail }}" style="border:none; background:#F5F7FA; width:30px; height:30px; border-radius:50%; font-size:15px; color:#475467; cursor:pointer;">✕</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:22px; padding:18px; background:#F9FAFC; border-radius:10px;">
+          <div><div style="font-size:11.5px; font-weight:700; color:#98A2B3; text-transform:uppercase;">Divisi</div><div style="font-size:13.5px; color:#16213D; margin-top:4px; font-weight:600;">{{ detailIntern.division }}</div></div>
+          <div><div style="font-size:11.5px; font-weight:700; color:#98A2B3; text-transform:uppercase;">Mentor</div><div style="font-size:13.5px; color:#16213D; margin-top:4px; font-weight:600;">{{ detailIntern.mentor }}</div></div>
+          <div><div style="font-size:11.5px; font-weight:700; color:#98A2B3; text-transform:uppercase;">Periode</div><div style="font-size:13.5px; color:#16213D; margin-top:4px; font-weight:600;">{{ detailIntern.period }}</div></div>
+          <div><div style="font-size:11.5px; font-weight:700; color:#98A2B3; text-transform:uppercase;">Jurusan</div><div style="font-size:13.5px; color:#16213D; margin-top:4px; font-weight:600;">{{ detailIntern.major }}</div></div>
+        </div>
+
+        <sc-if value="{{ detailIntern.hasExtension }}">
+          <div style="margin-top:14px; padding:12px 16px; background:#EDE9FE; border-radius:10px; font-size:12.5px; color:#6D28D9; font-weight:600;">Riwayat perpanjangan: 1x, ditambah 30 hari (alasan: menyelesaikan proyek audit klien).</div>
+        </sc-if>
+
+        <div style="display:flex; gap:4px; margin-top:22px; border-bottom:1px solid #E4E9F2;">
+          <button onClick="{{ goSubAbsensi }}" style="padding:9px 14px; border:none; background:none; font-size:13px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; color:{{ subAbsensiColor }}; border-bottom:2.5px solid {{ subAbsensiBorder }}; cursor:pointer;">Absensi</button>
+          <button onClick="{{ goSubNilai }}" style="padding:9px 14px; border:none; background:none; font-size:13px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; color:{{ subNilaiColor }}; border-bottom:2.5px solid {{ subNilaiBorder }}; cursor:pointer;">Nilai</button>
+          <button onClick="{{ goSubSertifikat }}" style="padding:9px 14px; border:none; background:none; font-size:13px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; color:{{ subSertifikatColor }}; border-bottom:2.5px solid {{ subSertifikatBorder }}; cursor:pointer;">Sertifikat</button>
+        </div>
+        <div style="padding:16px 4px; font-size:13px; color:#667085;">{{ subTabContent }}</div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+class Component extends DCLogic {
+  state = { tab: 'list', showAdd: false, showReject: false, rejectingRow: null, rejectReason: '', showDetail: false, detailRow: null, subTab: 'absensi' };
+
+  interns = [
+    { name: 'Yasinta Putri Maulani', nim: '5503230014', institution: 'Univ. Padjadjaran', division: 'Pajak Korporat', mentor: 'A. Reza Somana', period: 'Jan – Mei 2026', status: 'completed', major: 'Akuntansi', hasExtension: false },
+    { name: 'Bagas Kurniawan', nim: '1201220091', institution: 'Univ. Indonesia', division: 'Audit Internal', mentor: 'Nina Kartika', period: 'Feb – Agu 2026', status: 'active', major: 'Akuntansi', hasExtension: false },
+    { name: 'Salsabila Ramadhani', nim: '1301221045', institution: 'Institut Teknologi Bandung', division: 'Konsultasi Pajak', mentor: 'Dimas Prasetyo', period: 'Mar – Sep 2026', status: 'active', major: 'Manajemen', hasExtension: true },
+    { name: 'Fikri Alamsyah', nim: '2001230078', institution: 'Univ. Gadjah Mada', division: 'Legal & Compliance', mentor: 'A. Reza Somana', period: 'Jul – Des 2026', status: 'pending', major: 'Ilmu Hukum', hasExtension: false },
+    { name: 'Nadya Az-Zahra', nim: '1401220056', institution: 'Univ. Airlangga', division: 'Pajak Korporat', mentor: 'Nina Kartika', period: 'Jan – Apr 2026', status: 'failed', major: 'Akuntansi', hasExtension: false },
+    { name: 'Rizky Firmansyah', nim: '1101221033', institution: 'Univ. Diponegoro', division: 'Audit Internal', mentor: 'Dimas Prasetyo', period: 'Apr – Okt 2026', status: 'extended', major: 'Akuntansi', hasExtension: true },
+    { name: 'Aulia Rahmawati', nim: '1601230012', institution: 'Univ. Padjadjaran', division: 'Konsultasi Pajak', mentor: 'A. Reza Somana', period: 'Mei – Nov 2026', status: 'active', major: 'Perpajakan', hasExtension: false },
+    { name: 'Dimas Wijaya Putra', nim: '1701221067', institution: 'Univ. Brawijaya', division: 'Legal & Compliance', mentor: 'Nina Kartika', period: 'Jun – Des 2026', status: 'pending', major: 'Ilmu Hukum', hasExtension: false }
+  ];
+
+  pendingList = [
+    { name: 'Citra Puspitasari', nim: '1801230091', institution: 'Univ. Trisakti', division: 'Pajak Korporat', registeredAt: '14 Sep 2026' },
+    { name: 'Farhan Maulana', nim: '1901221055', institution: 'Univ. Parahyangan', division: 'Audit Internal', registeredAt: '15 Sep 2026' },
+    { name: 'Intan Permatasari', nim: '2001230033', institution: 'Univ. Bina Nusantara', division: 'Konsultasi Pajak', registeredAt: '16 Sep 2026' }
+  ];
+
+  statusMap = {
+    pending: { label: 'Pending', color: '#B45309', bg: '#FEF3C7' },
+    active: { label: 'Active', color: '#15803D', bg: '#DCFCE7' },
+    completed: { label: 'Completed', color: '#1D4ED8', bg: '#DBEAFE' },
+    failed: { label: 'Failed', color: '#B91C1C', bg: '#FEE2E2' },
+    extended: { label: 'Extended', color: '#6D28D9', bg: '#EDE9FE' }
+  };
+
+  colors = ['#003087', '#00A6C0', '#7C3AED', '#B45309', '#15803D', '#1D4ED8', '#B91C1C', '#0F766E'];
+  initialsOf(name) { return name.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase(); }
+
+  renderVals() {
+    const s = this.state;
+    const openDetail = (row) => this.setState({ showDetail: true, detailRow: row, subTab: 'absensi' });
+
+    const interns = this.interns.map((r, i) => ({
+      ...r, initials: this.initialsOf(r.name), avatarColor: this.colors[i % this.colors.length],
+      statusLabel: this.statusMap[r.status].label, statusColor: this.statusMap[r.status].color, statusBg: this.statusMap[r.status].bg,
+      onView: () => openDetail(r)
+    }));
+
+    const pendingRegs = this.pendingList.map((r, i) => ({
+      ...r, initials: this.initialsOf(r.name), avatarColor: this.colors[(i + 3) % this.colors.length],
+      onApprove: () => {},
+      onReject: () => this.setState({ showReject: true, rejectingRow: r, rejectReason: '' })
+    }));
+
+    const subContent = { absensi: 'Rekap kehadiran: 84% hadir, 3 izin, 1 sakit selama periode magang.', nilai: 'Skor evaluasi akhir: 88 (Grade A) — Kedisiplinan 90, Kinerja 87, Sikap 89, Komunikasi 85.', sertifikat: 'Sertifikat No. 001/LOGISTAX/INTERN/V/2026 — sudah digenerate.' };
+
+    let detailIntern = { name:'', nim:'', institution:'', division:'', mentor:'', period:'', major:'', hasExtension:false, initials:'', avatarColor:'#003087', statusLabel:'', statusColor:'', statusBg:'' };
+    if (s.detailRow) {
+      const r = s.detailRow;
+      detailIntern = { ...r, initials: this.initialsOf(r.name), avatarColor: '#003087', statusLabel: this.statusMap[r.status].label, statusColor: this.statusMap[r.status].color, statusBg: this.statusMap[r.status].bg };
+    }
+
+    return {
+      isListTab: s.tab === 'list', isPendingTab: s.tab === 'pending',
+      goList: () => this.setState({ tab: 'list' }), goPending: () => this.setState({ tab: 'pending' }),
+      tabListColor: s.tab === 'list' ? '#003087' : '#98A2B3', tabListBorder: s.tab === 'list' ? '#00A6C0' : 'transparent',
+      tabPendingColor: s.tab === 'pending' ? '#003087' : '#98A2B3', tabPendingBorder: s.tab === 'pending' ? '#00A6C0' : 'transparent',
+      pendingCount: this.pendingList.length,
+      interns, pendingRegs,
+      openAddForm: () => this.setState({ showAdd: true }), closeAdd: () => this.setState({ showAdd: false }), showAdd: s.showAdd,
+      showReject: s.showReject, rejectingName: s.rejectingRow ? s.rejectingRow.name : '', rejectReason: s.rejectReason,
+      onRejectReasonChange: (e) => this.setState({ rejectReason: e.target.value }),
+      closeReject: () => this.setState({ showReject: false }), confirmReject: () => this.setState({ showReject: false }),
+      showDetail: s.showDetail, detailIntern, closeDetail: () => this.setState({ showDetail: false }),
+      goSubAbsensi: () => this.setState({ subTab: 'absensi' }), goSubNilai: () => this.setState({ subTab: 'nilai' }), goSubSertifikat: () => this.setState({ subTab: 'sertifikat' }),
+      subAbsensiColor: s.subTab === 'absensi' ? '#003087' : '#98A2B3', subAbsensiBorder: s.subTab === 'absensi' ? '#00A6C0' : 'transparent',
+      subNilaiColor: s.subTab === 'nilai' ? '#003087' : '#98A2B3', subNilaiBorder: s.subTab === 'nilai' ? '#00A6C0' : 'transparent',
+      subSertifikatColor: s.subTab === 'sertifikat' ? '#003087' : '#98A2B3', subSertifikatBorder: s.subTab === 'sertifikat' ? '#00A6C0' : 'transparent',
+      subTabContent: subContent[s.subTab]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

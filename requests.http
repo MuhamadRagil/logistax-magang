@@ -1,0 +1,556 @@
+### Sistem Manajemen Magang PT Logistax Mitratama Solusi — Manual API Testing
+### Gunakan REST Client (VS Code) atau import ke Postman/Insomnia.
+### Jalankan server dulu: php artisan serve
+
+@baseUrl = http://127.0.0.1:8000/api
+@adminToken = ISI_SETELAH_LOGIN_ADMIN
+@mentorToken = ISI_SETELAH_LOGIN_MENTOR
+@internToken = ISI_SETELAH_LOGIN_INTERN
+@divisionId = ISI_UUID_DIVISI
+@mentorId = ISI_UUID_MENTOR
+@internId = ISI_UUID_INTERN
+@officeLatitude = -6.1753924
+@officeLongitude = 106.8271528
+@attendanceId = ISI_UUID_ATTENDANCE
+@evaluationId = ISI_UUID_EVALUATION
+@mentor2Token = ISI_SETELAH_LOGIN_MENTOR_LAIN
+
+
+### =========================
+### AUTH
+### =========================
+
+### Login Admin
+POST {{baseUrl}}/auth/admin/login
+Content-Type: application/json
+
+{
+  "email": "admin@logistax.test",
+  "password": "password123"
+}
+
+### Register Intern (self, mobile app)
+POST {{baseUrl}}/auth/intern/register
+Content-Type: application/json
+
+{
+  "email": "intern1@test.com",
+  "password": "password123",
+  "full_name": "Budi Santoso",
+  "nim": "12345678",
+  "institution": "Universitas Indonesia",
+  "major": "Informatika",
+  "phone": "081234567890",
+  "start_date": "2026-01-01",
+  "end_date": "2026-06-01"
+}
+
+### Login Intern
+POST {{baseUrl}}/auth/intern/login
+Content-Type: application/json
+
+{
+  "email": "intern1@test.com",
+  "password": "password123"
+}
+
+### Logout (pakai token admin atau intern)
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{adminToken}}
+
+
+### =========================
+### DIVISIONS (admin_magang only)
+### =========================
+
+### List divisions
+GET {{baseUrl}}/divisions
+Authorization: Bearer {{adminToken}}
+
+### Create division
+POST {{baseUrl}}/divisions
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "IT Support"
+}
+
+### Update division
+PATCH {{baseUrl}}/divisions/{{divisionId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "IT & Infrastructure"
+}
+
+### Soft-delete division (fails if still used by an intern)
+DELETE {{baseUrl}}/divisions/{{divisionId}}
+Authorization: Bearer {{adminToken}}
+
+
+### =========================
+### OFFICE LOCATIONS (admin_magang only)
+### =========================
+
+### List office locations
+GET {{baseUrl}}/office-locations
+Authorization: Bearer {{adminToken}}
+
+### Create office location
+POST {{baseUrl}}/office-locations
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Kantor Pusat Tangerang",
+  "latitude": -6.1783,
+  "longitude": 106.6319,
+  "radius_meters": 100
+}
+
+### Update office location
+PATCH {{baseUrl}}/office-locations/{{divisionId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "radius_meters": 150
+}
+
+### Soft-delete office location
+DELETE {{baseUrl}}/office-locations/{{divisionId}}
+Authorization: Bearer {{adminToken}}
+
+
+### =========================
+### INTERNS
+### =========================
+
+### List interns (admin_magang: semua, spv_mentor: hanya miliknya)
+GET {{baseUrl}}/interns?page=1&search=budi&status=pending
+Authorization: Bearer {{adminToken}}
+
+### Create intern langsung oleh admin (status langsung active)
+POST {{baseUrl}}/interns
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "intern2@test.com",
+  "full_name": "Siti Aminah",
+  "nim": "87654321",
+  "institution": "Universitas Gadjah Mada",
+  "major": "Sistem Informasi",
+  "phone": "081298765432",
+  "division_id": "{{divisionId}}",
+  "mentor_id": "{{mentorId}}",
+  "start_date": "2026-01-01",
+  "end_date": "2026-06-01"
+}
+
+### Detail intern
+GET {{baseUrl}}/interns/{{internId}}
+Authorization: Bearer {{adminToken}}
+
+### Update data dasar intern
+PATCH {{baseUrl}}/interns/{{internId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "phone": "081200000000"
+}
+
+### Approve intern (hanya status pending)
+POST {{baseUrl}}/interns/{{internId}}/approve
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "division_id": "{{divisionId}}",
+  "mentor_id": "{{mentorId}}"
+}
+
+### Reject intern (hanya status pending)
+POST {{baseUrl}}/interns/{{internId}}/reject
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Data institusi tidak valid"
+}
+
+### Extend masa magang
+POST {{baseUrl}}/interns/{{internId}}/extend
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "new_end_date": "2026-08-01",
+  "reason": "Kinerja baik, diperpanjang 2 bulan"
+}
+
+### Mark failed (hanya status active/extended)
+POST {{baseUrl}}/interns/{{internId}}/mark-failed
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Melanggar aturan perusahaan"
+}
+
+### Mark completed (hanya status active/extended)
+POST {{baseUrl}}/interns/{{internId}}/mark-completed
+Authorization: Bearer {{adminToken}}
+
+
+### =========================
+### ATTENDANCE — INTERN (middleware intern.auth)
+### =========================
+
+### Check-in (dalam radius kantor -> pakai koordinat office_location persis)
+POST {{baseUrl}}/attendance/check-in
+Authorization: Bearer {{internToken}}
+Content-Type: application/json
+
+{
+  "latitude": {{officeLatitude}},
+  "longitude": {{officeLongitude}}
+}
+
+### Check-in di luar radius (harus ditolak: "Lokasi Anda di luar radius kantor yang terdaftar.")
+POST {{baseUrl}}/attendance/check-in
+Authorization: Bearer {{internToken}}
+Content-Type: application/json
+
+{
+  "latitude": -6.9,
+  "longitude": 107.6
+}
+
+### Check-in dobel hari yang sama (harus ditolak: "Anda sudah check-in hari ini.")
+POST {{baseUrl}}/attendance/check-in
+Authorization: Bearer {{internToken}}
+Content-Type: application/json
+
+{
+  "latitude": {{officeLatitude}},
+  "longitude": {{officeLongitude}}
+}
+
+### Check-out (dalam radius, sudah check-in sebelumnya)
+POST {{baseUrl}}/attendance/check-out
+Authorization: Bearer {{internToken}}
+Content-Type: application/json
+
+{
+  "latitude": {{officeLatitude}},
+  "longitude": {{officeLongitude}}
+}
+
+### Ajukan izin (tanpa proof_file — opsional untuk izin)
+POST {{baseUrl}}/attendance/leave-request
+Authorization: Bearer {{internToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="date"
+
+2026-09-25
+--WebAppBoundary
+Content-Disposition: form-data; name="status"
+
+izin
+--WebAppBoundary
+Content-Disposition: form-data; name="notes"
+
+Ada acara keluarga
+--WebAppBoundary--
+
+### Ajukan sakit TANPA proof_file (harus ditolak — wajib untuk sakit)
+POST {{baseUrl}}/attendance/leave-request
+Authorization: Bearer {{internToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="date"
+
+2026-09-26
+--WebAppBoundary
+Content-Disposition: form-data; name="status"
+
+sakit
+--WebAppBoundary
+Content-Disposition: form-data; name="notes"
+
+Demam tinggi
+--WebAppBoundary--
+
+### Ajukan sakit DENGAN proof_file
+### Catatan: baris "< ./storage/app/public/.gitignore" di bawah cuma placeholder
+### (REST Client file-injection syntax) supaya request valid tanpa file tambahan.
+### Ganti dengan path file jpg/png/pdf asli saat testing sungguhan, contoh:
+### < ./scratch/surat_sakit.pdf
+POST {{baseUrl}}/attendance/leave-request
+Authorization: Bearer {{internToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="date"
+
+2026-09-26
+--WebAppBoundary
+Content-Disposition: form-data; name="status"
+
+sakit
+--WebAppBoundary
+Content-Disposition: form-data; name="notes"
+
+Demam tinggi, ada surat dokter
+--WebAppBoundary
+Content-Disposition: form-data; name="proof_file"; filename="surat_sakit.png"
+Content-Type: image/png
+
+< ./storage/app/public/.gitignore
+--WebAppBoundary--
+
+### Riwayat absensi saya (default bulan berjalan)
+GET {{baseUrl}}/attendance/my-history
+Authorization: Bearer {{internToken}}
+
+### Riwayat absensi saya (filter bulan & tahun tertentu)
+GET {{baseUrl}}/attendance/my-history?month=9&year=2026
+Authorization: Bearer {{internToken}}
+
+
+### =========================
+### ATTENDANCE — ADMIN (admin_magang & spv_mentor, di-scope di controller)
+### =========================
+
+### Rekap bulanan per intern (admin_magang: semua, spv_mentor: hanya bimbingannya)
+GET {{baseUrl}}/attendance/monthly-report?month=9&year=2026
+Authorization: Bearer {{adminToken}}
+
+### Rekap bulanan filter division & intern tertentu
+GET {{baseUrl}}/attendance/monthly-report?month=9&year=2026&division_id={{divisionId}}&intern_id={{internId}}
+Authorization: Bearer {{adminToken}}
+
+### List pengajuan izin/sakit yang masih pending (include proof_file_url)
+GET {{baseUrl}}/attendance/pending-approvals
+Authorization: Bearer {{adminToken}}
+
+### Setujui pengajuan (hanya kalau approval_status = pending)
+POST {{baseUrl}}/attendance/{{attendanceId}}/approve
+Authorization: Bearer {{adminToken}}
+
+### Tolak pengajuan (reason wajib, digabung ke kolom notes tanpa menimpa catatan asli)
+POST {{baseUrl}}/attendance/{{attendanceId}}/reject
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Surat dokter tidak jelas, mohon upload ulang"
+}
+
+### spv_mentor coba approve intern yang BUKAN bimbingannya (harus 403)
+POST {{baseUrl}}/attendance/{{attendanceId}}/approve
+Authorization: Bearer {{mentorToken}}
+
+
+### =========================
+### EVALUATIONS (admin_magang & spv_mentor, hak & scope di controller)
+### =========================
+
+### List intern yang perlu segera dinilai (belum ada evaluation, status active/extended,
+### end_date <= 7 hari dari sekarang atau sudah lewat). admin_magang: semua, spv_mentor: bimbingannya saja
+GET {{baseUrl}}/evaluations/pending
+Authorization: Bearer {{adminToken}}
+
+### List pending dengan window custom (misal 14 hari)
+GET {{baseUrl}}/evaluations/pending?within_days=14
+Authorization: Bearer {{mentorToken}}
+
+### Buat evaluasi baru — hanya mentor intern tsb ATAU admin_magang
+### total_score & grade SELALU dihitung server-side (dikirim di body pun diabaikan)
+POST {{baseUrl}}/evaluations
+Authorization: Bearer {{mentorToken}}
+Content-Type: application/json
+
+{
+  "intern_id": "{{internId}}",
+  "discipline_score": 90,
+  "performance_score": 85,
+  "attitude_score": 88,
+  "communication_score": 92,
+  "comments": "Kinerja sangat baik selama masa magang"
+}
+
+### Buat evaluasi lagi untuk intern yang SAMA (harus ditolak — sudah ada)
+POST {{baseUrl}}/evaluations
+Authorization: Bearer {{mentorToken}}
+Content-Type: application/json
+
+{
+  "intern_id": "{{internId}}",
+  "discipline_score": 50,
+  "performance_score": 50,
+  "attitude_score": 50,
+  "communication_score": 50
+}
+
+### spv_mentor coba buat evaluasi untuk intern yang BUKAN bimbingannya (harus 403)
+POST {{baseUrl}}/evaluations
+Authorization: Bearer {{mentor2Token}}
+Content-Type: application/json
+
+{
+  "intern_id": "{{internId}}",
+  "discipline_score": 80,
+  "performance_score": 80,
+  "attitude_score": 80,
+  "communication_score": 80
+}
+
+### --- Skenario PATCH: mentor yang SAMA dengan evaluated_by, belum ada certificate -> boleh edit bebas
+PATCH {{baseUrl}}/evaluations/{{evaluationId}}
+Authorization: Bearer {{mentorToken}}
+Content-Type: application/json
+
+{
+  "discipline_score": 95,
+  "comments": "Direvisi setelah diskusi lanjutan"
+}
+
+### --- Skenario PATCH: spv_mentor LAIN (bukan evaluated_by) -> harus 403
+PATCH {{baseUrl}}/evaluations/{{evaluationId}}
+Authorization: Bearer {{mentor2Token}}
+Content-Type: application/json
+
+{
+  "discipline_score": 10
+}
+
+### --- Skenario PATCH: admin_magang edit (kapan saja) -> edited_by_admin=true, last_edited_by=admin id
+PATCH {{baseUrl}}/evaluations/{{evaluationId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "performance_score": 100
+}
+
+### --- Skenario PATCH: setelah certificate terbit untuk intern ini, mentor (evaluated_by sekalipun) -> 403
+### Catatan: buat certificate dulu manual via tinker sebelum test ini (belum ada endpoint certificate di fase ini)
+PATCH {{baseUrl}}/evaluations/{{evaluationId}}
+Authorization: Bearer {{mentorToken}}
+Content-Type: application/json
+
+{
+  "discipline_score": 50
+}
+
+### --- Skenario PATCH: setelah certificate terbit, admin_magang tetap boleh edit
+### -> needs_certificate_regeneration jadi true, certificate LAMA tidak dihapus di sini
+PATCH {{baseUrl}}/evaluations/{{evaluationId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "attitude_score": 70
+}
+
+### Lihat evaluasi 1 intern (admin bebas, spv_mentor hanya kalau dia mentornya)
+GET {{baseUrl}}/evaluations/intern/{{internId}}
+Authorization: Bearer {{adminToken}}
+
+### spv_mentor coba lihat evaluasi intern yang BUKAN bimbingannya (harus 403)
+GET {{baseUrl}}/evaluations/intern/{{internId}}
+Authorization: Bearer {{mentor2Token}}
+
+
+### =========================
+### EVALUATION — INTERN (middleware intern.auth)
+### =========================
+
+### Lihat evaluasi sendiri (kalau sudah dinilai)
+GET {{baseUrl}}/my-evaluation
+Authorization: Bearer {{internToken}}
+
+### Lihat evaluasi sendiri kalau BELUM ada (return data null + message, BUKAN 404)
+GET {{baseUrl}}/my-evaluation
+Authorization: Bearer {{internToken}}
+
+
+### =========================
+### CERTIFICATES — ADMIN (admin_magang only untuk generate/regenerate/preview)
+### =========================
+
+### Preview sertifikat (nomor DUMMY, TANPA password, TIDAK menyimpan apa pun ke DB/counter)
+### Response berupa file PDF langsung, bukan JSON — buka manual/save-as di REST Client.
+GET {{baseUrl}}/certificates/preview/{{internId}}
+Authorization: Bearer {{adminToken}}
+
+### Generate sertifikat pertama kali — syarat: intern.status = completed, evaluation lengkap
+POST {{baseUrl}}/certificates/generate/{{internId}}
+Authorization: Bearer {{adminToken}}
+
+### Generate lagi untuk intern yang SAMA (certificate sudah ada, flag regenerate=false -> harus ditolak)
+POST {{baseUrl}}/certificates/generate/{{internId}}
+Authorization: Bearer {{adminToken}}
+
+### Generate untuk intern berstatus 'failed' (harus ditolak dengan pesan jelas)
+POST {{baseUrl}}/certificates/generate/{{internId}}
+Authorization: Bearer {{adminToken}}
+
+### Regenerate manual (admin boleh kapan saja selama certificate sudah ada,
+### tidak dibatasi hanya saat needs_certificate_regeneration = true — lihat README)
+POST {{baseUrl}}/certificates/regenerate/{{internId}}
+Authorization: Bearer {{adminToken}}
+
+### Regenerate untuk intern yang BELUM PERNAH punya certificate (harus ditolak)
+POST {{baseUrl}}/certificates/regenerate/{{internId}}
+Authorization: Bearer {{adminToken}}
+
+### spv_mentor coba akses endpoint generate (route admin_magang only -> harus 403)
+POST {{baseUrl}}/certificates/generate/{{internId}}
+Authorization: Bearer {{mentorToken}}
+
+
+### =========================
+### CERTIFICATES — ADMIN & MENTOR (metadata + download, scope di controller)
+### =========================
+
+### Lihat metadata sertifikat (BUKAN file PDF) — admin bebas, spv_mentor hanya bimbingannya
+GET {{baseUrl}}/certificates/{{internId}}
+Authorization: Bearer {{adminToken}}
+
+### spv_mentor LAIN (bukan mentornya) coba lihat metadata -> harus 403
+GET {{baseUrl}}/certificates/{{internId}}
+Authorization: Bearer {{mentor2Token}}
+
+### Download file PDF (password = NIM intern), increment download_count setiap diakses
+GET {{baseUrl}}/certificates/{{internId}}/download
+Authorization: Bearer {{adminToken}}
+
+### Download untuk intern berstatus 'failed' -> harus ditolak
+GET {{baseUrl}}/certificates/{{internId}}/download
+Authorization: Bearer {{adminToken}}
+
+
+### =========================
+### CERTIFICATE — INTERN (middleware intern.auth)
+### =========================
+
+### Lihat metadata sertifikat sendiri (kalau sudah ada)
+GET {{baseUrl}}/my-certificate
+Authorization: Bearer {{internToken}}
+
+### Lihat metadata sertifikat sendiri kalau BELUM ada (data null + message, BUKAN 404)
+GET {{baseUrl}}/my-certificate
+Authorization: Bearer {{internToken}}
+
+### Download sertifikat sendiri
+GET {{baseUrl}}/my-certificate/download
+Authorization: Bearer {{internToken}}

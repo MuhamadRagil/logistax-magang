@@ -1,0 +1,38 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Dashboard design tokens — matches design-reference/*.dc.html exactly.
+       Named "dash-*" (not repurposing Tailwind's own palette slots) so the
+       marketing "welcome" page's default theme is untouched. */
+    --font-dash: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+    --color-dash-navy: #003087;
+    --color-dash-navy-dark: #001f5c;
+    --color-dash-teal: #00a6c0;
+    --color-dash-ink: #16213d;
+    --color-dash-slate: #475467;
+    --color-dash-muted: #667085;
+    --color-dash-faint: #98a2b3;
+    --color-dash-border: #e4e9f2;
+    --color-dash-border-soft: #f0f2f6;
+    --color-dash-bg: #f5f7fa;
+    --color-dash-thead: #f9fafc;
+    --color-dash-pill: #eef2fb;
+    --color-dash-pill-hover: #e1e9f9;
+}
+
+/* Required by every `x-cloak` modal in the dashboard (interns/attendance
+   reject, add-intern, detail modals): Alpine only adds this attribute's
+   removal once it boots, so without this rule the modals render fully
+   visible — and block the page — for the whole window before Alpine.js
+   finishes loading, which is exactly the "modal auto-opens on page load"
+   bug this fixes. */
+[x-cloak] {
+    display: none !important;
+}
