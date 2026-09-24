@@ -1,7 +1,9 @@
 # Build Railway (builder NIXPACKS — lihat railway.json).
 # Provider PHP Nixpacks otomatis memasang PHP (versi dari composer.json),
-# nginx, php-fpm, composer, dan Node (karena ada package.json), lalu
-# menjalankan `composer install`, `npm install`, dan `npm run build`.
+# composer, dan Node (karena ada package.json), lalu menjalankan
+# `composer install`, `npm install`, dan `npm run build`.
+# nginx/php-fpm bawaan provider TIDAK dipakai: start command di railway.json
+# menjalankan `php artisan serve` langsung (document root public/ dijamin benar).
 # File ini hanya menambahkan yang dibutuhkan Browsershot.
 
 [variables]
