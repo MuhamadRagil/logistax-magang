@@ -1,0 +1,19 @@
+# Build Railway (builder NIXPACKS — lihat railway.json).
+# Provider PHP Nixpacks otomatis memasang PHP (versi dari composer.json),
+# nginx, php-fpm, composer, dan Node (karena ada package.json), lalu
+# menjalankan `composer install`, `npm install`, dan `npm run build`.
+# File ini hanya menambahkan yang dibutuhkan Browsershot.
+
+[variables]
+# puppeteer ^25 butuh Node >= 22.12, vite ^8 butuh >= 20.19 (default Nixpacks
+# lebih lama). Cek `node -v` di log build setelah deploy pertama.
+NIXPACKS_NODE_VERSION = "22"
+# Chromium diambil dari Nix; jangan biarkan puppeteer mengunduh Chrome sendiri
+# (juga sudah dicegah oleh `ignore-scripts=true` di .npmrc).
+PUPPETEER_SKIP_DOWNLOAD = "true"
+
+[phases.setup]
+# "..." = pertahankan paket bawaan provider PHP/Node, lalu tambah Chromium.
+# Path absolutnya (di /nix/store/...) tidak bisa ditulis di sini; start
+# command di railway.json mengisinya ke PUPPETEER_EXECUTABLE_PATH saat runtime.
+nixPkgs = ["...", "chromium"]

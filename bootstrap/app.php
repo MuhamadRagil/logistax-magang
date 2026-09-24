@@ -19,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Railway meneruskan request lewat proxy HTTPS. Tanpa ini Laravel
+        // mengira request-nya http, sehingga URL aset/route di halaman admin
+        // jadi http:// dan diblokir browser (mixed content).
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'admin.role' => EnsureAdminRole::class,
             'intern.auth' => EnsureInternAuth::class,
