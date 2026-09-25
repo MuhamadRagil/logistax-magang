@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "export PUPPETEER_EXECUTABLE_PATH=\"${PUPPETEER_EXECUTABLE_PATH:-$(command -v chromium)}\" BROWSERSHOT_NODE_BINARY=\"${BROWSERSHOT_NODE_BINARY:-$(command -v node)}\" BROWSERSHOT_NPM_BINARY=\"${BROWSERSHOT_NPM_BINARY:-$(command -v npm)}\" && php artisan migrate --force && php artisan storage:link --force && php artisan serve --host=0.0.0.0 --port=$PORT",
+    "startCommand": "export PUPPETEER_EXECUTABLE_PATH=\"${PUPPETEER_EXECUTABLE_PATH:-$(command -v chromium)}\" BROWSERSHOT_NODE_BINARY=\"${BROWSERSHOT_NODE_BINARY:-$(command -v node)}\" BROWSERSHOT_NPM_BINARY=\"${BROWSERSHOT_NPM_BINARY:-$(command -v npm)}\" && php artisan migrate --force && php artisan storage:link --force && php artisan serve --host=0.0.0.0 --port=$PORT --no-reload",
     "healthcheckPath": "/up",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
