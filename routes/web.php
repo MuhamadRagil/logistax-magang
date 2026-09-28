@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\CertificateController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\EvaluationController;
 use App\Http\Controllers\Web\InternController;
+use App\Http\Controllers\Web\OfficeLocationController;
 use App\Http\Controllers\Web\ReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,5 +54,11 @@ Route::middleware(['auth:web', 'admin.role.web:admin_magang,spv_mentor'])->group
         Route::post('/certificates/{intern}/generate', [CertificateController::class, 'generate'])->name('certificates.generate');
         Route::post('/certificates/{intern}/regenerate', [CertificateController::class, 'regenerate'])->name('certificates.regenerate');
         Route::get('/certificates/{intern}/preview', [CertificateController::class, 'preview'])->name('certificates.preview');
+
+        Route::get('/settings/office-locations', [OfficeLocationController::class, 'index'])->name('settings.office-locations.index');
+        Route::post('/settings/office-locations', [OfficeLocationController::class, 'store'])->name('settings.office-locations.store');
+        Route::put('/settings/office-locations/{officeLocation}', [OfficeLocationController::class, 'update'])->name('settings.office-locations.update');
+        Route::post('/settings/office-locations/{officeLocation}/deactivate', [OfficeLocationController::class, 'deactivate'])->name('settings.office-locations.deactivate');
+        Route::post('/settings/office-locations/{officeLocation}/activate', [OfficeLocationController::class, 'activate'])->name('settings.office-locations.activate');
     });
 });
