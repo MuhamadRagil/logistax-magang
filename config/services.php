@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    // Notifikasi WhatsApp (App\Services\FonnteService). Nonaktif secara
+    // default: tanpa FONNTE_ENABLED=true tidak ada pesan yang dikirim.
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+        'group_id' => env('FONNTE_GROUP_ID'), // format: <angka>@g.us
+        'enabled' => (bool) env('FONNTE_ENABLED', false),
+    ],
+
 ];

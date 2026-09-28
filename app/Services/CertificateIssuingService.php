@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\DomainActionException;
+use App\Jobs\SendCertificateReadyNotification;
 use App\Models\AdminUser;
 use App\Models\Certificate;
 use App\Models\Intern;
@@ -49,7 +50,16 @@ class CertificateIssuingService
             throw new DomainActionException('Sertifikat sudah pernah digenerate. Gunakan endpoint regenerate kalau ingin membuat ulang.', 400);
         }
 
-        return $this->issueCertificate($intern, $admin, $existing);
+        $certificate = $this->issueCertificate($intern, $admin, $existing);
+
+        // Only the FIRST issue notifies the intern. generate() also re-issues
+        // an existing certificate when needs_certificate_regeneration is set;
+        // that (like regenerate() and preview) sends nothing.
+        if (! $existing) {
+            SendCertificateReadyNotification::dispatchAfterResponse($intern->id);
+        }
+
+        return $certificate;
     }
 
     /**

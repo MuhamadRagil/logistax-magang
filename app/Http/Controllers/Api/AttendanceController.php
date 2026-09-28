@@ -10,6 +10,7 @@ use App\Http\Requests\Attendance\LeaveRequestRequest;
 use App\Http\Requests\Attendance\MonthlyReportRequest;
 use App\Http\Requests\Attendance\MyHistoryRequest;
 use App\Http\Requests\Attendance\RejectAttendanceRequest;
+use App\Jobs\SendAttendanceNotification;
 use App\Models\AdminUser;
 use App\Models\Attendance;
 use App\Models\Intern;
@@ -86,7 +87,11 @@ class AttendanceController extends Controller
             ]);
         }
 
-        return $this->success($attendance->fresh(), 'Check-in berhasil.', 201);
+        return $this->notifyAfterResponse(
+            $this->success($attendance->fresh(), 'Check-in berhasil.', 201),
+            $attendance,
+            SendAttendanceNotification::CHECK_IN,
+        );
     }
 
     public function checkOut(CheckOutRequest $request): JsonResponse
@@ -120,7 +125,32 @@ class AttendanceController extends Controller
             'check_out_lng' => $data['longitude'],
         ]);
 
-        return $this->success($attendance->fresh(), 'Check-out berhasil.');
+        return $this->notifyAfterResponse(
+            $this->success($attendance->fresh(), 'Check-out berhasil.'),
+            $attendance,
+            SendAttendanceNotification::CHECK_OUT,
+        );
+    }
+
+    /**
+     * Queue the WhatsApp group notification to run after the response is
+     * sent (no queue worker needed), then add Content-Length to the response.
+     *
+     * Why the header: under `php artisan serve` (Railway) there is no
+     * fastcgi_finish_request() and the built-in server replies with
+     * "Connection: close" and no length, so the client only knows the body is
+     * complete when the connection closes — i.e. AFTER the Fonnte call (up to
+     * 8 s). With Content-Length the client is done as soon as the body
+     * arrives (measured: 3.0 s -> 0.003 s with a 3 s post-response task).
+     * Status and body are unchanged.
+     */
+    private function notifyAfterResponse(JsonResponse $response, Attendance $attendance, string $event): JsonResponse
+    {
+        SendAttendanceNotification::dispatchAfterResponse($attendance->id, $event);
+
+        $response->headers->set('Content-Length', (string) strlen($response->getContent()));
+
+        return $response;
     }
 
     /**
