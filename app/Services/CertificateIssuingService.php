@@ -11,9 +11,16 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * Orchestrates certificate generate/regenerate (number + PDF render +
- * password-protect + storage + DB row). Extracted out of
- * Api\CertificateController so the web "Sertifikat" page can trigger the
- * exact same validated generate/regenerate flow.
+ * storage + DB row). Extracted out of Api\CertificateController so the web
+ * "Sertifikat" page can trigger the exact same validated generate/regenerate
+ * flow.
+ *
+ * Keputusan produk: PDF tidak lagi dienkripsi dengan password (sebelumnya
+ * password = NIM intern, lewat CertificatePdfService::protectWithPassword()).
+ * issueCertificate() sekarang menyimpan hasil Browsershot mentah dan menulis
+ * NULL ke pdf_password. protectWithPassword() masih ada dan
+ * setasign/fpdi-tcpdf belum di-uninstall — hanya sudah tidak dipanggil dari
+ * sini; pembersihan dependency-nya menyusul terpisah.
  */
 class CertificateIssuingService
 {
@@ -147,10 +154,9 @@ class CertificateIssuingService
 
         $html = $this->pdfService->renderHtml($intern, $intern->evaluation, $certificateNumber, $issuedDate, $issuedCity);
         $pdfBinary = $this->pdfService->renderPdf($html);
-        $protectedPdf = $this->pdfService->protectWithPassword($pdfBinary, $intern->nim);
 
         $path = $this->storagePathFor($certificateNumber);
-        Storage::disk('public')->put($path, $protectedPdf);
+        Storage::disk('public')->put($path, $pdfBinary);
         $pdfUrl = Storage::disk('public')->url($path);
 
         $attributes = [
@@ -159,7 +165,10 @@ class CertificateIssuingService
             'issued_date' => $issuedDate,
             'issued_city' => $issuedCity,
             'pdf_url' => $pdfUrl,
-            'pdf_password' => $intern->nim,
+            // NULL, bukan NIM lagi (lihat docblock kelas ini) — di-set eksplisit
+            // (bukan sekadar dihilangkan dari array) supaya regenerate juga
+            // membersihkan pdf_password lama pada certificate yang sudah ada.
+            'pdf_password' => null,
             'generated_by' => $admin->id,
         ];
 

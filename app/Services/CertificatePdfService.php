@@ -83,6 +83,11 @@ class CertificatePdfService
      * Re-open a PDF with FPDI (importing every page into a fresh TCPDF
      * document) and apply a user password. Browsershot/Chrome has no native
      * PDF-encryption option, so protection is a separate pass.
+     *
+     * Currently unused: keputusan produk menghentikan password protection
+     * pada sertifikat (lihat CertificateIssuingService::issueCertificate()).
+     * Method + package setasign/fpdi-tcpdf sengaja belum dihapus — dibersihkan
+     * terpisah kalau memang tidak akan dipakai lagi.
      */
     public function protectWithPassword(string $pdfBinary, string $password): string
     {

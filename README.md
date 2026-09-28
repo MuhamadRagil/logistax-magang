@@ -253,13 +253,14 @@ Middleware custom membedakan tipe user yang login:
   ("...gunakan endpoint regenerate"). Kalau certificate sudah ada DAN flag
   `true`, endpoint ini bertindak sebagai regenerate juga (update in-place,
   flag direset ke `false`). Nomor sertifikat dari `CertificateNumberService`,
-  PDF di-render via Browsershot lalu dipassword pakai NIM intern (FPDI+TCPDF),
-  disimpan ke `storage/app/public/certificates/`.
+  PDF di-render via Browsershot dan disimpan apa adanya (tidak dienkripsi —
+  lihat "Keputusan Desain: Sertifikat PDF Tidak Lagi Dipassword" di bawah)
+  ke `storage/app/public/certificates/`.
 - `POST /api/certificates/regenerate/{internId}` — hanya valid kalau
   certificate sudah ada. Lihat "Keputusan Desain" di bawah soal kapan endpoint
   ini boleh dipakai.
 - `GET /api/certificates/preview/{internId}` — render PDF sementara dengan
-  nomor dummy `PREVIEW/LOGISTAX/INTERN/{romawi}/{tahun}`, **tanpa password**,
+  nomor dummy `PREVIEW/LOGISTAX/INTERN/{romawi}/{tahun}`,
   **tidak menyimpan apa pun** ke database atau counter tahunan. Response
   langsung berupa file PDF (`Content-Type: application/pdf`), bukan JSON.
 
@@ -268,8 +269,8 @@ Middleware custom membedakan tipe user yang login:
   terbit, kota, `pdf_url`, `download_count`) — BUKAN file PDF-nya. `spv_mentor`
   di-scope ke bimbingannya (403 kalau bukan). Kalau certificate belum ada,
   return `data: null` + `message: "Sertifikat belum tersedia."` (bukan 404).
-- `GET /api/certificates/{internId}/download` — return file PDF asli
-  (terpassword NIM), increment `download_count` setiap diakses. Ditolak kalau
+- `GET /api/certificates/{internId}/download` — return file PDF asli,
+  increment `download_count` setiap diakses. Ditolak kalau
   `intern.status = failed`, dengan pesan
   "Sertifikat tidak dapat diproses untuk intern dengan status gagal."
 
@@ -466,11 +467,40 @@ regenerate langsung kapan pun dibutuhkan. Flag
 (dicek & ditampilkan di data evaluation) bahwa nilai berubah setelah
 sertifikat terbit — bukan sebagai gate keras di endpoint ini.
 
+## Keputusan Desain: Sertifikat PDF Tidak Lagi Dipassword
+
+Keputusan produk (28 Sep 2026): sertifikat PDF **tidak lagi dienkripsi
+dengan password**. Sebelumnya (lihat "Keputusan Desain: Package PDF &
+Password Protection" di atas) setiap PDF hasil Browsershot diberi password =
+NIM intern lewat `CertificatePdfService::protectWithPassword()`
+(FPDI+TCPDF). `CertificateIssuingService::issueCertificate()` (dipakai baik
+oleh `generate` maupun `regenerate`) sekarang menyimpan hasil Browsershot
+mentah tanpa lewat langkah itu.
+
+- `certificates.pdf_password` **tidak dihapus** — kolomnya dibuat nullable
+  lewat migration `2026_09_28_000000_make_certificates_pdf_password_nullable.php`
+  (data lama tidak disentuh), dan diisi `NULL` secara eksplisit untuk
+  sertifikat yang baru digenerate maupun diregenerate. Sertifikat lama yang
+  belum diregenerate ulang **masih terenkripsi** dengan `pdf_password` (NIM)
+  yang tersimpan sebelumnya — file-nya di storage tidak disentuh, jadi baru
+  hilang password-nya setelah admin menekan Regenerate.
+- `CertificatePdfService::protectWithPassword()` dan package
+  `setasign/fpdi-tcpdf` **belum di-uninstall** — cukup berhenti dipanggil.
+  Pembersihan dependency (kalau memang tidak akan dipakai lagi) dilakukan
+  terpisah.
+- Tidak ada API response yang pernah mengembalikan `pdf_password` mentah
+  (kolom ini sudah masuk `$hidden` di model `Certificate` sejak awal), jadi
+  tidak ada perubahan di sisi serialisasi API untuk keputusan ini.
+- `preview` (baik web maupun API) tidak pernah dipassword sejak awal — jadi
+  perilakunya di endpoint ini tidak berubah sama sekali.
+
 ## Scope Fase Ini (Fase 4 — Certificate)
 
 Ditambahkan: `CertificateNumberService` (nomor + proteksi race condition lewat
-`lockForUpdate`), `CertificatePdfService` (render Browsershot + password FPDI),
-`CertificateController` (7 endpoint di atas), template
+`lockForUpdate`), `CertificatePdfService` (render Browsershot; waktu itu juga
+password FPDI, dihentikan kemudian — lihat "Keputusan Desain: Sertifikat PDF
+Tidak Lagi Dipassword" di atas), `CertificateController` (7 endpoint di atas),
+template
 `resources/views/certificates/template.blade.php`, `config/browsershot.php`.
 
 **Tidak ada migration baru untuk tabel `certificates`** — semua kolom yang
