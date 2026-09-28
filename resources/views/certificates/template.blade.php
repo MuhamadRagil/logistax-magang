@@ -3,9 +3,24 @@
 <head>
 <meta charset="utf-8">
 <title>Sertifikat {{ $intern->full_name }}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Tangerine:wght@400;700&display=swap" rel="stylesheet">
+{{-- Fonts are self-hosted (resources/fonts/certificate, the same latin +
+     latin-ext files Google Fonts serves for Poppins 400-800 / Tangerine
+     400,700, with Google's unicode-range) and inlined as base64 data URIs.
+     Browsershot renders a raw HTML string, so a remote <link> or relative
+     url() can't be relied on — in the Railway container the Google Fonts
+     request didn't finish before printing and every text node came out blank. --}}
+<style>
+@foreach (json_decode(file_get_contents(resource_path('fonts/certificate/manifest.json')), true) as $font)
+    @font-face {
+        font-family: '{{ $font['family'] }}';
+        font-style: normal;
+        font-weight: {{ $font['weight'] }};
+        font-display: block;
+        src: url(data:font/woff2;base64,{{ base64_encode(file_get_contents(resource_path('fonts/certificate/'.$font['file']))) }}) format('woff2');
+        unicode-range: {{ $font['range'] }};
+    }
+@endforeach
+</style>
 <style>
     @page {
         margin: 0;

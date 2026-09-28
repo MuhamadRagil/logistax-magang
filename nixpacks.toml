@@ -18,4 +18,8 @@ PUPPETEER_SKIP_DOWNLOAD = "true"
 # "..." = pertahankan paket bawaan provider PHP/Node, lalu tambah Chromium.
 # Path absolutnya (di /nix/store/...) tidak bisa ditulis di sini; start
 # command di railway.json mengisinya ke PUPPETEER_EXECUTABLE_PATH saat runtime.
-nixPkgs = ["...", "chromium"]
+# fontconfig + dejavu/liberation = font sistem cadangan untuk Chromium. Font
+# sertifikat sendiri sudah di-embed (base64) di template; paket ini hanya
+# jaring pengaman supaya Chromium di container Nix selalu punya minimal satu
+# font kalau ada teks yang jatuh ke fallback.
+nixPkgs = ["...", "chromium", "fontconfig", "dejavu_fonts", "liberation_ttf"]

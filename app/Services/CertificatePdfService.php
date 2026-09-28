@@ -52,10 +52,16 @@ class CertificatePdfService
         // Page size/orientation/margins come from the @page rule in the Blade
         // template (preferCSSPageSize) rather than being declared twice —
         // declaring both here and in CSS caused a stray blank second page.
+        // Fonts are inlined as data URIs, but decoding them is still async —
+        // wait until the browser reports every @font-face ready, otherwise
+        // text can print blank (seen with Nix Chromium on Railway). The short
+        // delay is a safety margin for layout after the fonts swap in.
         $browsershot = Browsershot::html($html)
             ->showBackground()
             ->preferCSSPageSize()
             ->waitUntilNetworkIdle()
+            ->waitForFunction('document.fonts.status === "loaded"', timeout: 10000)
+            ->setDelay(300)
             ->noSandbox();
 
         if ($nodeBinary = config('browsershot.node_binary')) {
