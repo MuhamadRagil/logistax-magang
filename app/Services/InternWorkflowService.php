@@ -9,17 +9,26 @@ use App\Models\Intern;
 use App\Models\InternAccount;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
  * Intern lifecycle actions (create-by-admin, approve, reject, extend,
- * mark-failed, mark-completed). Extracted out of Api\InternController so the
- * web dashboard controllers can trigger the exact same validated logic
- * instead of re-implementing it — the API controller's behavior/response
- * shape is unchanged, it just delegates here now.
+ * mark-failed, mark-completed, hard-delete). Extracted out of
+ * Api\InternController so the web dashboard controllers can trigger the
+ * exact same validated logic instead of re-implementing it — the API
+ * controller's behavior/response shape is unchanged, it just delegates here
+ * now.
  */
 class InternWorkflowService
 {
+    public function __construct(
+        // Only used by deleteInterns() to derive a certificate's on-disk PDF
+        // path from its certificate_number via storagePathFor() — a pure
+        // string builder, no rendering/side effects triggered by using it here.
+        private readonly CertificateIssuingService $certificates,
+    ) {}
+
     /**
      * @return array{intern: Intern, generated_password: string}
      */
@@ -136,5 +145,79 @@ class InternWorkflowService
         $intern->update(['status' => 'completed']);
 
         return $intern->fresh();
+    }
+
+    /**
+     * HARD delete one or more interns and everything that belongs to them —
+     * unlike divisions/office locations, there is no "nonaktifkan" here, the
+     * rows and files are gone for good. Any status (including 'pending' from
+     * self-registration) can be deleted; there is no status guard.
+     *
+     * Whole-or-nothing across ALL given interns: wrapped in one transaction,
+     * so a failure partway through rolls every row back, never leaving some
+     * interns deleted and others not. Storage deletes happen inside the
+     * transaction too, right before the DB row that references each file is
+     * removed — if the transaction later rolls back, the DB rows survive, but
+     * a file already unlinked from disk cannot be restored. In practice this
+     * only matters if something after the file delete throws, which nothing
+     * here does (Storage::delete() returns false rather than throwing).
+     *
+     * @param  list<string>  $internIds
+     * @return int number of interns deleted
+     */
+    public function deleteInterns(array $internIds): int
+    {
+        return DB::transaction(function () use ($internIds) {
+            $interns = Intern::query()
+                ->whereIn('id', $internIds)
+                ->with(['attendances', 'certificate'])
+                ->get();
+
+            foreach ($interns as $intern) {
+                $this->deleteInternWithRelatedData($intern);
+            }
+
+            return $interns->count();
+        });
+    }
+
+    private function deleteInternWithRelatedData(Intern $intern): void
+    {
+        // Files first, while the DB rows that record their paths still exist.
+        if ($intern->certificate) {
+            Storage::disk('public')->delete($this->certificates->storagePathFor($intern->certificate->certificate_number));
+        }
+
+        foreach ($intern->attendances as $attendance) {
+            if ($attendance->proof_file_url) {
+                Storage::disk('public')->delete($this->attendanceProofPath($attendance->proof_file_url));
+            }
+        }
+
+        $intern->attendances()->delete();
+        $intern->evaluation()->delete();
+        $intern->certificate()->delete();
+        $intern->extensionLogs()->delete();
+
+        // Not cascaded at the DB level: the FK runs the other way (interns
+        // references intern_accounts, not the reverse), so deleting the
+        // intern never touches its account on its own.
+        if ($intern->intern_account_id) {
+            InternAccount::destroy($intern->intern_account_id);
+        }
+
+        $intern->delete();
+    }
+
+    /**
+     * attendances.proof_file_url is stored as a full URL, built at upload
+     * time with Storage::disk('public')->url($path) (see
+     * Api\AttendanceController::leaveRequest()). Every URL from that disk is
+     * "<APP_URL>/storage/<path>" (config/filesystems.php), so the part after
+     * "/storage/" is the disk-relative path Storage::delete() needs.
+     */
+    private function attendanceProofPath(string $url): string
+    {
+        return Str::after($url, '/storage/');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Exceptions\DomainActionException;
 use App\Http\Requests\Intern\ApproveInternRequest;
+use App\Http\Requests\Intern\BulkDeleteInternRequest;
 use App\Http\Requests\Intern\RejectInternRequest;
 use App\Http\Requests\Intern\StoreInternRequest;
 use App\Models\AdminUser;
@@ -145,5 +146,21 @@ class InternController extends Controller
         }
 
         return back()->with('status', 'Intern berhasil ditolak.');
+    }
+
+    /**
+     * admin_magang only (route middleware) — hard-delete, see
+     * InternWorkflowService::deleteInterns() docblock.
+     */
+    public function bulkDelete(BulkDeleteInternRequest $request): RedirectResponse
+    {
+        $count = $this->workflow->deleteInterns($request->validated('intern_ids'));
+
+        return back()->with(
+            'status',
+            $count > 1
+                ? "{$count} intern berhasil dihapus permanen beserta seluruh data terkait."
+                : '1 intern berhasil dihapus permanen beserta seluruh data terkait.'
+        );
     }
 }

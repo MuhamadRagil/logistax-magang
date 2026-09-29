@@ -3,7 +3,10 @@
 @section('title', 'Manajemen Intern')
 
 @section('content')
-<div x-data="internPage()" x-init="init()">
+<div x-data="internPage({
+        openAdd: @js($openAdd),
+        rows: @js(($activeTab === 'list' ? $interns : $pending)->map(fn ($i) => ['id' => $i->id, 'name' => $i->full_name])->values()),
+    })" x-init="init()">
 
     <div class="flex gap-1.5 mb-5">
         <a href="{{ route('interns.index', ['tab' => 'list']) }}" class="px-4.5 py-2.5 rounded-t-lg border-0 border-b-[2.5px] {{ $activeTab === 'list' ? 'border-dash-teal text-dash-navy' : 'border-transparent text-dash-faint' }} bg-transparent text-sm font-bold no-underline">
@@ -39,15 +42,23 @@
             </select>
             <button type="submit" class="px-3.5 py-2.5 border border-dash-border rounded-lg text-[13.5px] font-semibold text-dash-slate bg-white cursor-pointer">Terapkan</button>
             <button type="button" @click="showAdd = true" class="px-4.5 py-2.5 bg-dash-navy text-white border-0 rounded-lg text-[13.5px] font-bold cursor-pointer whitespace-nowrap hover:bg-dash-navy-dark">+ Tambah Intern</button>
+            <button type="button" x-show="selectedIds.length > 0" x-cloak @click="openBulkDelete()" class="flex items-center gap-1.5 px-4 py-2.5 bg-red-600 text-white border-0 rounded-lg text-[13.5px] font-bold cursor-pointer whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+                Hapus Terpilih (<span x-text="selectedIds.length"></span>)
+            </button>
         </form>
 
         <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
-            <div class="grid grid-cols-[2.3fr_1.1fr_1.6fr_1.4fr_1.3fr_1.4fr_1fr_0.8fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
+            <div class="grid grid-cols-[28px_2.3fr_1.1fr_1.6fr_1.4fr_1.3fr_1.4fr_1fr_0.8fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide items-center">
+                <input type="checkbox" :checked="allSelected()" @change="toggleSelectAll($event.target.checked)" class="w-3.5 h-3.5 cursor-pointer" aria-label="Pilih semua">
                 <div>Nama</div><div>NIM</div><div>Institusi</div><div>Divisi</div><div>Mentor</div><div>Periode</div><div>Status</div><div>Aksi</div>
             </div>
             @forelse ($interns as $intern)
                 @php [$statusLabel, $statusColor, $statusBg] = \App\Support\Badge::internStatus($intern->status);@endphp
-                <div class="grid grid-cols-[2.3fr_1.1fr_1.6fr_1.4fr_1.3fr_1.4fr_1fr_0.8fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
+                <div class="grid grid-cols-[28px_2.3fr_1.1fr_1.6fr_1.4fr_1.3fr_1.4fr_1fr_0.8fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
+                    <input type="checkbox" :checked="selectedIds.includes('{{ $intern->id }}')" @change="toggleOne('{{ $intern->id }}', $event.target.checked)" class="w-3.5 h-3.5 cursor-pointer" aria-label="Pilih {{ $intern->full_name }}">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full text-white text-xs font-bold flex items-center justify-center flex-shrink-0" style="background:{{ \App\Support\Badge::avatarColor($intern->full_name) }}">{{ \App\Support\Badge::initials($intern->full_name) }}</div>
                         <span class="text-[13.5px] font-bold text-dash-ink">{{ $intern->full_name }}</span>
@@ -69,12 +80,23 @@
 
         <div class="mt-4">{{ $interns->links() }}</div>
     @else
+        <div class="flex justify-end mb-3.5" x-show="selectedIds.length > 0" x-cloak>
+            <button type="button" @click="openBulkDelete()" class="flex items-center gap-1.5 px-4 py-2.5 bg-red-600 text-white border-0 rounded-lg text-[13.5px] font-bold cursor-pointer whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+                Hapus Terpilih (<span x-text="selectedIds.length"></span>)
+            </button>
+        </div>
+
         <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
-            <div class="grid grid-cols-[2fr_1.1fr_1.6fr_1.4fr_1.4fr_1.4fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
+            <div class="grid grid-cols-[28px_2fr_1.1fr_1.6fr_1.4fr_1.4fr_1.4fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide items-center">
+                <input type="checkbox" :checked="allSelected()" @change="toggleSelectAll($event.target.checked)" class="w-3.5 h-3.5 cursor-pointer" aria-label="Pilih semua">
                 <div>Nama</div><div>NIM</div><div>Institusi</div><div>Divisi Diajukan</div><div>Tanggal Daftar</div><div>Aksi</div>
             </div>
             @forelse ($pending as $intern)
-                <div class="grid grid-cols-[2fr_1.1fr_1.6fr_1.4fr_1.4fr_1.4fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
+                <div class="grid grid-cols-[28px_2fr_1.1fr_1.6fr_1.4fr_1.4fr_1.4fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
+                    <input type="checkbox" :checked="selectedIds.includes('{{ $intern->id }}')" @change="toggleOne('{{ $intern->id }}', $event.target.checked)" class="w-3.5 h-3.5 cursor-pointer" aria-label="Pilih {{ $intern->full_name }}">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full text-white text-xs font-bold flex items-center justify-center flex-shrink-0" style="background:{{ \App\Support\Badge::avatarColor($intern->full_name) }}">{{ \App\Support\Badge::initials($intern->full_name) }}</div>
                         <span class="text-[13.5px] font-bold text-dash-ink">{{ $intern->full_name }}</span>
@@ -204,6 +226,48 @@
         </div>
     </div>
 
+    {{-- Bulk delete modal --}}
+    <div x-show="showBulkDelete" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-[480px] max-h-[88vh] overflow-auto p-6.5" @click.outside="closeBulkDelete()">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <div class="text-base font-extrabold text-dash-ink">Hapus Intern Terpilih</div>
+            </div>
+
+            <div class="mt-4 px-3.5 py-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[12.5px] font-semibold leading-relaxed">
+                Tindakan ini PERMANEN. Semua data absensi, evaluasi, dan sertifikat (termasuk file PDF) milik intern yang dipilih akan ikut terhapus dan TIDAK BISA dipulihkan.
+            </div>
+
+            <div class="mt-4 text-[12.5px] font-bold text-dash-ink">Intern yang akan dihapus (<span x-text="selectedIds.length"></span>):</div>
+            <ul class="mt-1.5 max-h-[160px] overflow-auto text-[13px] text-dash-slate list-disc pl-5 space-y-0.5">
+                <template x-for="name in selectedNames()" :key="name">
+                    <li x-text="name"></li>
+                </template>
+            </ul>
+
+            <form method="POST" :action="'{{ route('interns.bulk-delete') }}'" @submit="bulkDeleteSubmitting = true">
+                @csrf
+                <template x-for="id in selectedIds" :key="id">
+                    <input type="hidden" name="intern_ids[]" :value="id">
+                </template>
+
+                <label class="block text-[12.5px] font-bold text-dash-ink mt-4.5 mb-1.5">
+                    Ketik <span class="font-mono bg-dash-bg px-1.5 py-0.5 rounded">HAPUS</span> untuk konfirmasi
+                </label>
+                <input type="text" x-model="confirmText" autocomplete="off" placeholder="HAPUS" class="w-full box-border px-3 py-2.5 border border-dash-border rounded-lg text-[13.5px] outline-none focus:border-red-400">
+
+                <div class="flex gap-2.5 mt-5.5 justify-end">
+                    <button type="button" @click="closeBulkDelete()" class="px-4.5 py-2.5 rounded-lg border border-dash-border bg-white text-dash-slate text-[13.5px] font-bold cursor-pointer">Batal</button>
+                    <button type="submit" :disabled="confirmText !== 'HAPUS' || bulkDeleteSubmitting" class="px-4.5 py-2.5 rounded-lg border-0 bg-red-600 text-white text-[13.5px] font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Hapus Permanen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Detail modal --}}
     <div x-show="showDetail" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl w-[640px] max-h-[88vh] overflow-auto p-7" @click.outside="showDetail = false" x-show="detail">
@@ -253,16 +317,47 @@
 </div>
 
 <script>
-function internPage() {
+function internPage(config) {
     return {
-        showAdd: {{ $openAdd ? 'true' : 'false' }},
+        showAdd: config.openAdd,
         showReject: false,
         rejectName: '',
         rejectAction: '',
         showDetail: false,
         detail: null,
         subTab: 'absensi',
+        // Bulk delete — `rows` is the {id, name} list for whichever table is
+        // actually rendered (list or pending tab; only one exists in the DOM
+        // per page load, both tabs are separate server round trips). Reused
+        // both for "select all" and for the modal's name list, so no fetch.
+        rows: config.rows,
+        selectedIds: [],
+        showBulkDelete: false,
+        bulkDeleteSubmitting: false,
+        confirmText: '',
         init() {},
+        toggleOne(id, checked) {
+            this.selectedIds = checked
+                ? [...this.selectedIds, id]
+                : this.selectedIds.filter(x => x !== id);
+        },
+        toggleSelectAll(checked) {
+            this.selectedIds = checked ? this.rows.map(r => r.id) : [];
+        },
+        allSelected() {
+            return this.rows.length > 0 && this.selectedIds.length === this.rows.length;
+        },
+        selectedNames() {
+            return this.rows.filter(r => this.selectedIds.includes(r.id)).map(r => r.name);
+        },
+        openBulkDelete() {
+            this.confirmText = '';
+            this.bulkDeleteSubmitting = false;
+            this.showBulkDelete = true;
+        },
+        closeBulkDelete() {
+            this.showBulkDelete = false;
+        },
         openReject(id, name) {
             this.rejectName = name;
             this.rejectAction = '{{ url('/interns') }}/' + id + '/reject';
