@@ -6,6 +6,7 @@ use App\Exceptions\DomainActionException;
 use App\Http\Requests\Intern\ApproveInternRequest;
 use App\Http\Requests\Intern\BulkDeleteInternRequest;
 use App\Http\Requests\Intern\RejectInternRequest;
+use App\Http\Requests\Intern\ResetInternPasswordRequest;
 use App\Http\Requests\Intern\StoreInternRequest;
 use App\Models\AdminUser;
 use App\Models\Division;
@@ -162,5 +163,32 @@ class InternController extends Controller
                 ? "{$count} intern berhasil dihapus permanen beserta seluruh data terkait."
                 : '1 intern berhasil dihapus permanen beserta seluruh data terkait.'
         );
+    }
+
+    /**
+     * admin_magang only (route middleware). JSON always — this is called
+     * from an Alpine fetch() so the new password can be shown in the modal
+     * without a page reload, not a redirect like the other actions here.
+     */
+    public function resetPassword(ResetInternPasswordRequest $request, Intern $intern): JsonResponse
+    {
+        $mode = $request->validated('mode');
+        $customPassword = $mode === 'custom' ? $request->validated('password') : null;
+
+        try {
+            $password = $this->workflow->resetInternPassword($intern, $customPassword);
+        } catch (DomainActionException $e) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => $e->getMessage(),
+            ], $e->status);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => ['password' => $password],
+            'message' => 'Password berhasil direset.',
+        ]);
     }
 }

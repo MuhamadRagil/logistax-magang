@@ -6,6 +6,8 @@
 <div x-data="internPage({
         openAdd: @js($openAdd),
         rows: @js(($activeTab === 'list' ? $interns : $pending)->map(fn ($i) => ['id' => $i->id, 'name' => $i->full_name])->values()),
+        csrfToken: @js(csrf_token()),
+        resetPasswordUrlBase: @js(url('/interns')),
     })" x-init="init()">
 
     <div class="flex gap-1.5 mb-5">
@@ -71,6 +73,19 @@
                     <div><span class="text-xs font-bold {{ $statusColor }} {{ $statusBg }} px-2.5 py-1 rounded-full inline-block">{{ $statusLabel }}</span></div>
                     <div class="flex gap-2">
                         <button type="button" @click="openDetail('{{ $intern->id }}')" class="border border-dash-border bg-white rounded-md px-2.5 py-1.5 text-[11.5px] font-bold text-dash-navy cursor-pointer">Lihat</button>
+                        @if ($intern->intern_account_id)
+                            <button type="button" @click="openResetPassword('{{ $intern->id }}', '{{ addslashes($intern->full_name) }}')" title="Reset Password" class="border border-dash-border bg-white rounded-md w-8 h-8 flex items-center justify-center text-dash-slate cursor-pointer flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.412-.082-.848-.028-1.147.27l-4.286 4.286a2.25 2.25 0 01-1.591.659h-1.5a1.5 1.5 0 01-1.5-1.5v-1.5c0-.597.237-1.17.659-1.591l4.286-4.286c.298-.299.352-.735.27-1.147A6 6 0 1121.75 8.25z" />
+                                </svg>
+                            </button>
+                        @else
+                            <button type="button" disabled title="Intern belum memiliki akun login" class="border border-dash-border-soft bg-dash-bg rounded-md w-8 h-8 flex items-center justify-center text-dash-faint cursor-not-allowed flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.412-.082-.848-.028-1.147.27l-4.286 4.286a2.25 2.25 0 01-1.591.659h-1.5a1.5 1.5 0 01-1.5-1.5v-1.5c0-.597.237-1.17.659-1.591l4.286-4.286c.298-.299.352-.735.27-1.147A6 6 0 1121.75 8.25z" />
+                                </svg>
+                            </button>
+                        @endif
                     </div>
                 </div>
             @empty
@@ -127,6 +142,19 @@
                             <button type="submit" class="border-0 bg-green-100 text-green-700 rounded-md px-3 py-1.5 text-xs font-bold cursor-pointer">Approve</button>
                         </form>
                         <button type="button" @click="openReject('{{ $intern->id }}', '{{ addslashes($intern->full_name) }}')" class="border-0 bg-red-100 text-red-700 rounded-md px-3 py-1.5 text-xs font-bold cursor-pointer">Reject</button>
+                        @if ($intern->intern_account_id)
+                            <button type="button" @click="openResetPassword('{{ $intern->id }}', '{{ addslashes($intern->full_name) }}')" title="Reset Password" class="border border-dash-border bg-white rounded-md w-8 h-8 flex items-center justify-center text-dash-slate cursor-pointer flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.412-.082-.848-.028-1.147.27l-4.286 4.286a2.25 2.25 0 01-1.591.659h-1.5a1.5 1.5 0 01-1.5-1.5v-1.5c0-.597.237-1.17.659-1.591l4.286-4.286c.298-.299.352-.735.27-1.147A6 6 0 1121.75 8.25z" />
+                                </svg>
+                            </button>
+                        @else
+                            <button type="button" disabled title="Intern belum memiliki akun login" class="border border-dash-border-soft bg-dash-bg rounded-md w-8 h-8 flex items-center justify-center text-dash-faint cursor-not-allowed flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.412-.082-.848-.028-1.147.27l-4.286 4.286a2.25 2.25 0 01-1.591.659h-1.5a1.5 1.5 0 01-1.5-1.5v-1.5c0-.597.237-1.17.659-1.591l4.286-4.286c.298-.299.352-.735.27-1.147A6 6 0 1121.75 8.25z" />
+                                </svg>
+                            </button>
+                        @endif
                     </div>
                 </div>
             @empty
@@ -268,6 +296,75 @@
         </div>
     </div>
 
+    {{-- Reset password modal --}}
+    <div x-show="showResetPassword" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="closeResetPassword()">
+            <template x-if="!resetResultPassword">
+                <div>
+                    <div class="text-base font-extrabold text-dash-ink">Reset Password <span x-text="resetInternName"></span></div>
+
+                    <div class="flex gap-2 mt-4.5">
+                        <button type="button" @click="resetMode = 'random'" class="flex-1 px-3 py-2.5 rounded-lg border text-[13px] font-bold cursor-pointer" :class="resetMode === 'random' ? 'border-dash-teal bg-dash-pill text-dash-navy' : 'border-dash-border bg-white text-dash-slate'">Generate Otomatis</button>
+                        <button type="button" @click="resetMode = 'custom'" class="flex-1 px-3 py-2.5 rounded-lg border text-[13px] font-bold cursor-pointer" :class="resetMode === 'custom' ? 'border-dash-teal bg-dash-pill text-dash-navy' : 'border-dash-border bg-white text-dash-slate'">Tentukan Sendiri</button>
+                    </div>
+
+                    <div x-show="resetMode === 'custom'" x-cloak class="mt-4">
+                        <label class="block text-[12.5px] font-bold text-dash-ink mb-1.5">Password Baru</label>
+                        <div class="relative" x-data="{ show: false }">
+                            <input :type="show ? 'text' : 'password'" x-model="resetCustomPassword" placeholder="Minimal 8 karakter" autocomplete="new-password" class="w-full box-border px-3.5 py-2.5 pr-11 border border-dash-border rounded-lg text-[13.5px] outline-none focus:border-dash-teal">
+                            <button type="button" @click="show = !show" class="absolute right-2.5 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer p-1 flex items-center justify-center">
+                                <span class="w-5 h-5 rounded-full border-[1.5px] border-dash-faint relative block">
+                                    <span class="w-2 h-2 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" :class="show ? 'bg-dash-teal' : 'bg-dash-faint'"></span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="text-[11.5px] text-dash-muted mt-1">Minimal 8 karakter.</div>
+                    </div>
+
+                    <div x-show="resetError" x-cloak x-text="resetError" class="mt-3.5 px-3.5 py-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[12.5px] font-semibold"></div>
+
+                    <div class="flex gap-2.5 mt-5.5 justify-end">
+                        <button type="button" @click="closeResetPassword()" class="px-4.5 py-2.5 rounded-lg border border-dash-border bg-white text-dash-slate text-[13.5px] font-bold cursor-pointer">Batal</button>
+                        <button type="button" @click="submitResetPassword()" :disabled="resetSubmitting || (resetMode === 'custom' && resetCustomPassword.length < 8)" class="px-4.5 py-2.5 rounded-lg border-0 bg-dash-navy text-white text-[13.5px] font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+                            <span x-text="resetSubmitting ? 'Memproses...' : 'Reset Password'"></span>
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="resetResultPassword">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="text-base font-extrabold text-dash-ink">Password Berhasil Direset</div>
+                    </div>
+
+                    <div class="mt-4.5 flex items-center gap-2 px-3.5 py-3 border border-dash-border rounded-lg bg-dash-bg">
+                        <span class="flex-1 font-mono text-[15px] font-bold text-dash-ink tracking-wide break-all" x-text="resetResultPassword"></span>
+                        <button type="button" @click="copyResetPassword()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-dash-border bg-white text-dash-navy text-[12px] font-bold cursor-pointer flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                            </svg>
+                            <span x-text="resetCopied ? 'Tersalin!' : 'Copy'"></span>
+                        </button>
+                    </div>
+
+                    <div class="mt-3.5 px-3.5 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[12.5px] font-semibold leading-relaxed">
+                        Password ini hanya ditampilkan sekali. Catat atau salin sekarang, dan segera berikan ke intern yang bersangkutan.
+                    </div>
+
+                    <div class="flex justify-end mt-5.5">
+                        <button type="button" @click="closeResetPassword()" class="px-4.5 py-2.5 rounded-lg border-0 bg-dash-navy text-white text-[13.5px] font-bold cursor-pointer">Tutup</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
     {{-- Detail modal --}}
     <div x-show="showDetail" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl w-[640px] max-h-[88vh] overflow-auto p-7" @click.outside="showDetail = false" x-show="detail">
@@ -357,6 +454,73 @@ function internPage(config) {
         },
         closeBulkDelete() {
             this.showBulkDelete = false;
+        },
+        // Reset password
+        showResetPassword: false,
+        resetInternId: null,
+        resetInternName: '',
+        resetMode: 'random',
+        resetCustomPassword: '',
+        resetSubmitting: false,
+        resetError: '',
+        resetResultPassword: null,
+        resetCopied: false,
+        openResetPassword(id, name) {
+            this.resetInternId = id;
+            this.resetInternName = name;
+            this.resetMode = 'random';
+            this.resetCustomPassword = '';
+            this.resetSubmitting = false;
+            this.resetError = '';
+            this.resetResultPassword = null;
+            this.resetCopied = false;
+            this.showResetPassword = true;
+        },
+        closeResetPassword() {
+            this.showResetPassword = false;
+        },
+        async submitResetPassword() {
+            if (this.resetMode === 'custom' && this.resetCustomPassword.length < 8) {
+                this.resetError = 'Password minimal 8 karakter.';
+                return;
+            }
+            this.resetSubmitting = true;
+            this.resetError = '';
+            try {
+                const res = await fetch(`${config.resetPasswordUrlBase}/${this.resetInternId}/reset-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': config.csrfToken,
+                    },
+                    body: JSON.stringify({
+                        mode: this.resetMode,
+                        password: this.resetMode === 'custom' ? this.resetCustomPassword : null,
+                    }),
+                });
+                const data = await res.json().catch(() => null);
+                if (!res.ok || !data || !data.success) {
+                    this.resetError = (data && data.message)
+                        || (data && data.data && Object.values(data.data).flat().join(' '))
+                        || 'Gagal mereset password.';
+                    return;
+                }
+                this.resetResultPassword = data.data.password;
+            } catch (e) {
+                this.resetError = 'Terjadi kesalahan jaringan, silakan coba lagi.';
+            } finally {
+                this.resetSubmitting = false;
+            }
+        },
+        async copyResetPassword() {
+            try {
+                await navigator.clipboard.writeText(this.resetResultPassword);
+                this.resetCopied = true;
+                setTimeout(() => { this.resetCopied = false; }, 2000);
+            } catch (e) {
+                this.resetError = 'Gagal menyalin ke clipboard — salin manual dari kotak di atas.';
+            }
         },
         openReject(id, name) {
             this.rejectName = name;

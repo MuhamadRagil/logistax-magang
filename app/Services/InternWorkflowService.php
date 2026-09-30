@@ -22,6 +22,16 @@ use Illuminate\Support\Str;
  */
 class InternWorkflowService
 {
+    private const GENERATED_PASSWORD_LENGTH = 8;
+
+    // Excludes 0/O/o and 1/l/I — the pairs easiest to mis-type from a
+    // handwritten note or mis-read out loud when handing this to an intern.
+    private const PASSWORD_UPPERCASE = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+
+    private const PASSWORD_LOWERCASE = 'abcdefghjkmnpqrstuvwxyz';
+
+    private const PASSWORD_DIGITS = '23456789';
+
     public function __construct(
         // Only used by deleteInterns() to derive a certificate's on-disk PDF
         // path from its certificate_number via storagePathFor() — a pure
@@ -207,6 +217,56 @@ class InternWorkflowService
         }
 
         $intern->delete();
+    }
+
+    /**
+     * Admin-triggered password reset for an intern's login account (replaces
+     * doing this by hand in Tinker). $newPassword null = generate a random
+     * one; otherwise it's the admin-chosen password, already validated
+     * (min:8) by ResetInternPasswordRequest.
+     *
+     * Returns the new password in PLAINTEXT — the only place it ever exists
+     * outside the admin's own screen. Callers must show it to the admin
+     * exactly once (nothing here persists or logs it) and never echo it back
+     * from any other endpoint.
+     */
+    public function resetInternPassword(Intern $intern, ?string $newPassword = null): string
+    {
+        if (! $intern->intern_account_id) {
+            throw new DomainActionException('Intern ini belum memiliki akun login.', 400);
+        }
+
+        $plainPassword = $newPassword ?? $this->generateReadablePassword();
+
+        // Instance update (not a query-builder ::whereKey()->update()), so
+        // InternAccount's `'password' => 'hashed'` cast actually runs —
+        // a query-builder update writes the raw value as-is, which would
+        // store this plaintext straight into the database.
+        $intern->account->update(['password' => $plainPassword]);
+
+        return $plainPassword;
+    }
+
+    /**
+     * 8 characters drawn from PASSWORD_UPPERCASE/LOWERCASE/DIGITS, with at
+     * least one of each guaranteed (the rest filled and shuffled randomly) —
+     * "gampang dibaca manusia" without being a single, guessable pattern.
+     */
+    private function generateReadablePassword(): string
+    {
+        $pools = [self::PASSWORD_UPPERCASE, self::PASSWORD_LOWERCASE, self::PASSWORD_DIGITS];
+        $pickFrom = fn (string $pool) => $pool[random_int(0, strlen($pool) - 1)];
+
+        $chars = array_map($pickFrom, $pools);
+        $allChars = implode('', $pools);
+
+        while (count($chars) < self::GENERATED_PASSWORD_LENGTH) {
+            $chars[] = $pickFrom($allChars);
+        }
+
+        shuffle($chars);
+
+        return implode('', $chars);
     }
 
     /**
