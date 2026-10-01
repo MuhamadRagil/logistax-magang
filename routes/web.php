@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\CertificateController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\EvaluationController;
 use App\Http\Controllers\Web\InternController;
+use App\Http\Controllers\Web\ActivityLogController;
 use App\Http\Controllers\Web\OfficeLocationController;
 use App\Http\Controllers\Web\ReportController;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,8 @@ Route::middleware(['auth:web', 'admin.role.web:admin_magang,spv_mentor'])->group
         Route::post('/certificates/{intern}/generate', [CertificateController::class, 'generate'])->name('certificates.generate');
         Route::post('/certificates/{intern}/regenerate', [CertificateController::class, 'regenerate'])->name('certificates.regenerate');
         Route::get('/certificates/{intern}/preview', [CertificateController::class, 'preview'])->name('certificates.preview');
+
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 
         Route::get('/settings/office-locations', [OfficeLocationController::class, 'index'])->name('settings.office-locations.index');
         Route::post('/settings/office-locations', [OfficeLocationController::class, 'store'])->name('settings.office-locations.store');

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\ActivityLogger;
 
 /**
  * Intern lifecycle actions (create-by-admin, approve, reject, extend,
@@ -84,6 +85,8 @@ class InternWorkflowService
             'status' => 'active',
         ]);
 
+        ActivityLogger::log('intern.approved', $intern, "{$intern->full_name} ({$intern->nim})");
+
         return $intern->fresh(['division', 'mentor']);
     }
 
@@ -106,6 +109,8 @@ class InternWorkflowService
             'rejection_reason' => $reason,
         ]);
 
+        ActivityLogger::log('intern.rejected', $intern, "{$intern->full_name} ({$intern->nim})", ['reason' => $reason]);
+
         return $intern->fresh();
     }
 
@@ -127,6 +132,12 @@ class InternWorkflowService
                 'reason' => $data['reason'],
                 'extended_by' => $admin->id,
             ]);
+
+            ActivityLogger::log('intern.extended', $intern, "{$intern->full_name} ({$intern->nim})", [
+                'old_end_date' => $oldEndDate->toDateString(),
+                'new_end_date' => $data['new_end_date'],
+                'reason' => $data['reason'],
+            ]);
         });
 
         return $intern->fresh();
@@ -143,6 +154,8 @@ class InternWorkflowService
             'failed_reason' => $reason,
         ]);
 
+        ActivityLogger::log('intern.marked_failed', $intern, "{$intern->full_name} ({$intern->nim})", ['reason' => $reason]);
+
         return $intern->fresh();
     }
 
@@ -153,6 +166,8 @@ class InternWorkflowService
         }
 
         $intern->update(['status' => 'completed']);
+
+        ActivityLogger::log('intern.marked_completed', $intern, "{$intern->full_name} ({$intern->nim})");
 
         return $intern->fresh();
     }
@@ -193,6 +208,11 @@ class InternWorkflowService
 
     private function deleteInternWithRelatedData(Intern $intern): void
     {
+        ActivityLogger::log('intern.bulk_deleted', null, "{$intern->full_name} ({$intern->nim})", [
+            'full_name' => $intern->full_name,
+            'nim' => $intern->nim,
+        ]);
+
         // Files first, while the DB rows that record their paths still exist.
         if ($intern->certificate) {
             Storage::disk('public')->delete($this->certificates->storagePathFor($intern->certificate->certificate_number));
@@ -243,6 +263,10 @@ class InternWorkflowService
         // a query-builder update writes the raw value as-is, which would
         // store this plaintext straight into the database.
         $intern->account->update(['password' => $plainPassword]);
+
+        ActivityLogger::log('intern.password_reset', $intern, "{$intern->full_name} ({$intern->nim})", [
+            'mode' => $newPassword ? 'custom' : 'random',
+        ]);
 
         return $plainPassword;
     }
