@@ -49,16 +49,22 @@ class CertificatePdfService
      */
     public function renderPdf(string $html): string
     {
-        // Page size/orientation/margins come from the @page rule in the Blade
-        // template (preferCSSPageSize) rather than being declared twice —
-        // declaring both here and in CSS caused a stray blank second page.
+        // Page size is set explicitly here (297x210mm = A4 landscape, the exact
+        // dimensions the template is designed at: html/body are 297mm x 210mm).
+        // We DON'T use preferCSSPageSize() because the template's
+        // `@page { size: 297mm 210mm landscape }` is invalid CSS — two explicit
+        // lengths can't be combined with an orientation keyword — so Chromium
+        // ignores it and falls back to its default page (US Letter portrait),
+        // leaving the landscape design stranded in the top-left. Margins are 0
+        // so Chromium adds no white padding around the full-bleed artwork.
         // Fonts are inlined as data URIs, but decoding them is still async —
         // wait until the browser reports every @font-face ready, otherwise
         // text can print blank (seen with Nix Chromium on Railway). The short
         // delay is a safety margin for layout after the fonts swap in.
         $browsershot = Browsershot::html($html)
             ->showBackground()
-            ->preferCSSPageSize()
+            ->paperSize(297, 210, 'mm')
+            ->margins(0, 0, 0, 0)
             ->waitUntilNetworkIdle()
             ->waitForFunction('document.fonts.status === "loaded"', timeout: 10000)
             ->setDelay(300)
