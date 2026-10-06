@@ -7,6 +7,8 @@ use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\EvaluationController;
 use App\Http\Controllers\Web\InternController;
 use App\Http\Controllers\Web\ActivityLogController;
+use App\Http\Controllers\Web\DivisionController;
+use App\Http\Controllers\Web\MentorController;
 use App\Http\Controllers\Web\OfficeLocationController;
 use App\Http\Controllers\Web\ReportController;
 use Illuminate\Support\Facades\Route;
@@ -68,5 +70,15 @@ Route::middleware(['auth:web', 'admin.role.web:admin_magang,spv_mentor'])->group
         Route::put('/settings/office-locations/{officeLocation}', [OfficeLocationController::class, 'update'])->name('settings.office-locations.update');
         Route::post('/settings/office-locations/{officeLocation}/deactivate', [OfficeLocationController::class, 'deactivate'])->name('settings.office-locations.deactivate');
         Route::post('/settings/office-locations/{officeLocation}/activate', [OfficeLocationController::class, 'activate'])->name('settings.office-locations.activate');
+
+        Route::get('/settings/divisions', [DivisionController::class, 'index'])->name('settings.divisions.index');
+        Route::post('/settings/divisions', [DivisionController::class, 'store'])->name('settings.divisions.store');
+        Route::put('/settings/divisions/{division}', [DivisionController::class, 'update'])->name('settings.divisions.update');
+        Route::delete('/settings/divisions/{division}', [DivisionController::class, 'destroy'])->name('settings.divisions.destroy');
+
+        Route::get('/settings/mentors', [MentorController::class, 'index'])->name('settings.mentors.index');
+        Route::post('/settings/mentors', [MentorController::class, 'store'])->name('settings.mentors.store');
+        Route::put('/settings/mentors/{mentor}', [MentorController::class, 'update'])->name('settings.mentors.update');
+        Route::delete('/settings/mentors/{mentor}', [MentorController::class, 'destroy'])->name('settings.mentors.destroy');
     });
 });

@@ -3,6 +3,7 @@
 @section('title', 'Pengaturan')
 
 @section('content')
+@include('settings.partials.tabs')
 {{-- Leaflet is only needed on this page, so it's loaded here rather than in
      layouts/app (keeps every other page untouched). Stylesheet <link> in body
      is valid HTML5; the script is synchronous so `L` exists before

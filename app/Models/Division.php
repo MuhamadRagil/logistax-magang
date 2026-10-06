@@ -27,4 +27,9 @@ class Division extends Model
     {
         return $this->hasMany(Intern::class);
     }
+
+    public function mentors(): HasMany
+    {
+        return $this->hasMany(AdminUser::class, 'division_id');
+    }
 }

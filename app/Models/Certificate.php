@@ -18,6 +18,7 @@ class Certificate extends Model
         'certificate_number',
         'issued_date',
         'issued_city',
+        'mentor_name',
         'pdf_url',
         'pdf_password',
         'download_count',

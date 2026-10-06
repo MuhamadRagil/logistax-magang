@@ -52,5 +52,11 @@ class ActivityLogController extends Controller
         'intern.extended' => 'Memperpanjang masa magang',
         'intern.marked_failed' => 'Menandai intern gagal',
         'intern.marked_completed' => 'Menandai intern selesai',
+        'division.created' => 'Membuat divisi',
+        'division.updated' => 'Mengubah divisi',
+        'division.deleted' => 'Menghapus divisi',
+        'mentor.created' => 'Membuat mentor',
+        'mentor.updated' => 'Mengubah mentor',
+        'mentor.deleted' => 'Menghapus mentor',
     ];
 }

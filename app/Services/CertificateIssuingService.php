@@ -162,7 +162,11 @@ class CertificateIssuingService
             ? $existing->certificate_number
             : $this->numberService->generate($issuedDate);
 
-        $html = $this->pdfService->renderHtml($intern, $intern->evaluation, $certificateNumber, $issuedDate, $issuedCity);
+        // Nama mentor di-snapshot saat terbit pertama kali; regenerate memakai
+        // snapshot itu, bukan relasi, supaya rename/hapus mentor tidak mengubah sertifikat.
+        $mentorName = $existing?->mentor_name ?: $intern->mentor?->name;
+
+        $html = $this->pdfService->renderHtml($intern, $intern->evaluation, $certificateNumber, $issuedDate, $issuedCity, $mentorName);
         $pdfBinary = $this->pdfService->renderPdf($html);
 
         $path = $this->storagePathFor($certificateNumber);
@@ -174,6 +178,7 @@ class CertificateIssuingService
             'certificate_number' => $certificateNumber,
             'issued_date' => $issuedDate,
             'issued_city' => $issuedCity,
+            'mentor_name' => $mentorName,
             'pdf_url' => $pdfUrl,
             // NULL, bukan NIM lagi (lihat docblock kelas ini) — di-set eksplisit
             // (bukan sekadar dihilangkan dari array) supaya regenerate juga

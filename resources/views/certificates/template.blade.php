@@ -300,7 +300,7 @@
             <div class="signature right">
                 <div class="sig-line"></div>
                 <div class="sig-name">
-                    {{ $intern->mentor?->name }}{{ $intern->mentor?->title ? ', '.$intern->mentor->title : '' }}
+                    {{ ($mentorName ?? null) ?: $intern->mentor?->name }}{{ $intern->mentor?->title ? ', '.$intern->mentor->title : '' }}
                 </div>
                 <div class="sig-role">Supervisor</div>
             </div>

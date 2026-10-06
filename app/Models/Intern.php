@@ -53,7 +53,7 @@ class Intern extends Model
 
     public function mentor(): BelongsTo
     {
-        return $this->belongsTo(AdminUser::class, 'mentor_id');
+        return $this->belongsTo(AdminUser::class, 'mentor_id')->withTrashed();
     }
 
     public function attendances(): HasMany

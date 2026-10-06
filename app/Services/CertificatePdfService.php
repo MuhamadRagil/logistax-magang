@@ -16,6 +16,7 @@ class CertificatePdfService
         string $certificateNumber,
         CarbonInterface $issuedDate,
         string $issuedCity,
+        ?string $mentorName = null,
     ): string {
         return view('certificates.template', [
             'intern' => $intern,
@@ -23,6 +24,7 @@ class CertificatePdfService
             'certificateNumber' => $certificateNumber,
             'issuedDate' => $issuedDate,
             'issuedCity' => $issuedCity,
+            'mentorName' => $mentorName,
             'logoBase64' => $this->logoBase64(),
         ])->render();
     }
