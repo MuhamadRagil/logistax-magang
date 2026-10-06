@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Intern;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ApproveInternRequest extends FormRequest
 {
@@ -24,7 +25,7 @@ class ApproveInternRequest extends FormRequest
             'mentor_id' => [
                 $intern && $intern->mentor_id ? 'sometimes' : 'required',
                 'uuid',
-                'exists:admin_users,id',
+                Rule::exists('admin_users', 'id')->whereNull('deleted_at'),
             ],
         ];
     }

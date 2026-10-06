@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Intern;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreInternRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class StoreInternRequest extends FormRequest
             'major' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'division_id' => ['required', 'uuid', 'exists:divisions,id'],
-            'mentor_id' => ['required', 'uuid', 'exists:admin_users,id'],
+            'mentor_id' => ['required', 'uuid', Rule::exists('admin_users', 'id')->whereNull('deleted_at')],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
         ];

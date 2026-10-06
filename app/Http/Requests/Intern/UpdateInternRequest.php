@@ -24,7 +24,7 @@ class UpdateInternRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:30'],
             'photo_url' => ['nullable', 'string', 'max:2048'],
             'division_id' => ['sometimes', 'nullable', 'uuid', 'exists:divisions,id'],
-            'mentor_id' => ['sometimes', 'nullable', 'uuid', 'exists:admin_users,id'],
+            'mentor_id' => ['sometimes', 'nullable', 'uuid', Rule::exists('admin_users', 'id')->whereNull('deleted_at')],
             'start_date' => ['sometimes', 'date'],
             'end_date' => ['sometimes', 'date', 'after_or_equal:start_date'],
         ];
