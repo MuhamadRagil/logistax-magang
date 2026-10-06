@@ -8,6 +8,7 @@
         rows: @js(($activeTab === 'list' ? $interns : $pending)->map(fn ($i) => ['id' => $i->id, 'name' => $i->full_name])->values()),
         csrfToken: @js(csrf_token()),
         resetPasswordUrlBase: @js(url('/interns')),
+        isAdminMagang: @js($isAdminMagang),
     })" x-init="init()">
 
     <div class="flex gap-1.5 mb-5">
@@ -365,6 +366,83 @@
         </div>
     </div>
 
+    {{-- Extend modal --}}
+    <div x-show="showExtend" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="showExtend = false">
+            <div class="text-base font-extrabold text-dash-ink">Perpanjang Masa Magang</div>
+            <div class="text-[13px] text-dash-muted mt-1">Perpanjang masa magang <span class="font-bold text-dash-ink" x-text="detail?.name"></span></div>
+            <form method="POST" :action="detail ? '{{ url('/interns') }}/' + detail.id + '/extend' : ''">
+                @csrf
+                <div class="mt-4">
+                    <label class="block text-[12.5px] font-bold text-dash-ink mb-1.5">Tanggal Selesai Baru</label>
+                    <input type="date" name="new_end_date" x-model="extendDate" :min="extendMinDate" required class="w-full box-border px-3 py-2.5 border border-dash-border rounded-lg text-[13.5px] outline-none focus:border-dash-teal">
+                </div>
+                <div class="mt-3.5">
+                    <label class="block text-[12.5px] font-bold text-dash-ink mb-1.5">Alasan Perpanjangan</label>
+                    <textarea name="reason" x-model="extendReason" required placeholder="Minimal 10 karakter..." class="w-full box-border p-3 border border-dash-border rounded-lg text-[13.5px] min-h-[90px] outline-none resize-y focus:border-dash-teal"></textarea>
+                    <div class="text-[11.5px] text-dash-muted mt-1">Minimal 10 karakter.</div>
+                </div>
+                <div class="flex gap-2.5 mt-4.5 justify-end">
+                    <button type="button" @click="showExtend = false" class="px-4.5 py-2.5 rounded-lg border border-dash-border bg-white text-dash-slate text-[13.5px] font-bold cursor-pointer">Batal</button>
+                    <button type="submit" :disabled="extendReason.length < 10 || !extendDate" class="px-4.5 py-2.5 rounded-lg border-0 bg-violet-600 text-white text-[13.5px] font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Perpanjang</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Mark completed modal --}}
+    <div x-show="showMarkCompleted" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="showMarkCompleted = false">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="text-base font-extrabold text-dash-ink">Tandai Selesai</div>
+            </div>
+            <div class="mt-4 text-[13.5px] text-dash-slate leading-relaxed">
+                Yakin ingin menandai <span class="font-bold text-dash-ink" x-text="detail?.name"></span> sebagai <span class="font-bold text-blue-700">SELESAI</span> magang? Ini mengizinkan evaluasi &amp; sertifikat diproses.
+            </div>
+            <form method="POST" :action="detail ? '{{ url('/interns') }}/' + detail.id + '/mark-completed' : ''">
+                @csrf
+                <div class="flex gap-2.5 mt-5.5 justify-end">
+                    <button type="button" @click="showMarkCompleted = false" class="px-4.5 py-2.5 rounded-lg border border-dash-border bg-white text-dash-slate text-[13.5px] font-bold cursor-pointer">Batal</button>
+                    <button type="submit" class="px-4.5 py-2.5 rounded-lg border-0 bg-blue-600 text-white text-[13.5px] font-bold cursor-pointer">Konfirmasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Mark failed modal --}}
+    <div x-show="showMarkFailed" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="showMarkFailed = false">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="text-base font-extrabold text-dash-ink">Tandai Gagal</div>
+            </div>
+            <div class="mt-4 px-3.5 py-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[12.5px] font-semibold leading-relaxed">
+                Status GAGAL akan mencegah sertifikat diterbitkan untuk intern ini.
+            </div>
+            <form method="POST" :action="detail ? '{{ url('/interns') }}/' + detail.id + '/mark-failed' : ''">
+                @csrf
+                <div class="mt-4">
+                    <label class="block text-[12.5px] font-bold text-dash-ink mb-1.5">Alasan</label>
+                    <textarea name="reason" x-model="failedReason" required placeholder="Minimal 10 karakter..." class="w-full box-border p-3 border border-dash-border rounded-lg text-[13.5px] min-h-[90px] outline-none resize-y focus:border-red-400"></textarea>
+                    <div class="text-[11.5px] text-dash-muted mt-1">Minimal 10 karakter.</div>
+                </div>
+                <div class="flex gap-2.5 mt-4.5 justify-end">
+                    <button type="button" @click="showMarkFailed = false" class="px-4.5 py-2.5 rounded-lg border border-dash-border bg-white text-dash-slate text-[13.5px] font-bold cursor-pointer">Batal</button>
+                    <button type="submit" :disabled="failedReason.length < 10" class="px-4.5 py-2.5 rounded-lg border-0 bg-red-600 text-white text-[13.5px] font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Tandai Gagal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Detail modal --}}
     <div x-show="showDetail" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl w-[640px] max-h-[88vh] overflow-auto p-7" @click.outside="showDetail = false" x-show="detail">
@@ -407,6 +485,32 @@
                         <span x-show="subTab === 'nilai'" x-text="detail.evaluationSummary"></span>
                         <span x-show="subTab === 'sertifikat'" x-text="detail.certificateSummary"></span>
                     </div>
+
+                    <template x-if="isAdminMagang && (detail.status === 'active' || detail.status === 'extended')">
+                        <div class="mt-4 pt-4 border-t border-dash-border">
+                            <div class="text-[11.5px] font-bold text-dash-faint uppercase tracking-wide mb-3">Aksi Status</div>
+                            <div class="flex gap-2 flex-wrap">
+                                <button type="button" @click="openExtend()" class="flex items-center gap-1.5 px-3.5 py-2 bg-violet-50 text-violet-700 border border-violet-200 rounded-lg text-[12.5px] font-bold cursor-pointer hover:bg-violet-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                    </svg>
+                                    Perpanjang Masa Magang
+                                </button>
+                                <button type="button" @click="showMarkCompleted = true" class="flex items-center gap-1.5 px-3.5 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[12.5px] font-bold cursor-pointer hover:bg-blue-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Tandai Selesai
+                                </button>
+                                <button type="button" @click="openMarkFailed()" class="flex items-center gap-1.5 px-3.5 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg text-[12.5px] font-bold cursor-pointer hover:bg-red-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Tandai Gagal
+                                </button>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </template>
         </div>
@@ -521,6 +625,28 @@ function internPage(config) {
             } catch (e) {
                 this.resetError = 'Gagal menyalin ke clipboard — salin manual dari kotak di atas.';
             }
+        },
+        // Status actions
+        isAdminMagang: config.isAdminMagang,
+        showExtend: false,
+        extendDate: '',
+        extendMinDate: '',
+        extendReason: '',
+        showMarkCompleted: false,
+        showMarkFailed: false,
+        failedReason: '',
+        openExtend() {
+            if (!this.detail) return;
+            const d = new Date(this.detail.endDate);
+            d.setDate(d.getDate() + 1);
+            this.extendMinDate = d.toISOString().slice(0, 10);
+            this.extendDate = '';
+            this.extendReason = '';
+            this.showExtend = true;
+        },
+        openMarkFailed() {
+            this.failedReason = '';
+            this.showMarkFailed = true;
         },
         openReject(id, name) {
             this.rejectName = name;

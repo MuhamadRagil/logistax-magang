@@ -69,6 +69,7 @@ class InternController extends Controller
             'institutions' => Intern::query()->distinct()->orderBy('institution')->pluck('institution'),
             'activeTab' => $request->query('tab', 'list'),
             'openAdd' => $request->query('action') === 'add',
+            'isAdminMagang' => $admin->role === 'admin_magang',
         ]);
     }
 
@@ -114,6 +115,7 @@ class InternController extends Controller
             'certificateSummary' => $intern->certificate
                 ? "Sertifikat No. {$intern->certificate->certificate_number} — sudah digenerate."
                 : 'Sertifikat belum digenerate.',
+            'endDate' => $intern->end_date->toDateString(),
         ]);
     }
 
@@ -163,6 +165,48 @@ class InternController extends Controller
                 ? "{$count} intern berhasil dihapus permanen beserta seluruh data terkait."
                 : '1 intern berhasil dihapus permanen beserta seluruh data terkait.'
         );
+    }
+
+    public function extend(Request $request, Intern $intern): RedirectResponse
+    {
+        $request->validate([
+            'new_end_date' => ['required', 'date', 'after:' . $intern->end_date->toDateString()],
+            'reason' => ['required', 'string', 'min:10'],
+        ]);
+
+        try {
+            $this->workflow->extend($intern, $request->user('web'), $request->only('new_end_date', 'reason'));
+        } catch (DomainActionException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('status', "Masa magang {$intern->full_name} berhasil diperpanjang.");
+    }
+
+    public function markFailed(Request $request, Intern $intern): RedirectResponse
+    {
+        $request->validate([
+            'reason' => ['required', 'string', 'min:10'],
+        ]);
+
+        try {
+            $this->workflow->markFailed($intern, $request->input('reason'));
+        } catch (DomainActionException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('status', "{$intern->full_name} ditandai gagal.");
+    }
+
+    public function markCompleted(Request $request, Intern $intern): RedirectResponse
+    {
+        try {
+            $this->workflow->markCompleted($intern);
+        } catch (DomainActionException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('status', "{$intern->full_name} ditandai selesai.");
     }
 
     /**

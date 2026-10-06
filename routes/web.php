@@ -53,6 +53,9 @@ Route::middleware(['auth:web', 'admin.role.web:admin_magang,spv_mentor'])->group
         Route::post('/interns/{intern}/reject', [InternController::class, 'reject'])->name('interns.reject');
         Route::post('/interns/bulk-delete', [InternController::class, 'bulkDelete'])->name('interns.bulk-delete');
         Route::post('/interns/{intern}/reset-password', [InternController::class, 'resetPassword'])->name('interns.reset-password');
+        Route::post('/interns/{intern}/extend', [InternController::class, 'extend'])->name('interns.extend');
+        Route::post('/interns/{intern}/mark-failed', [InternController::class, 'markFailed'])->name('interns.mark-failed');
+        Route::post('/interns/{intern}/mark-completed', [InternController::class, 'markCompleted'])->name('interns.mark-completed');
 
         Route::post('/certificates/{intern}/generate', [CertificateController::class, 'generate'])->name('certificates.generate');
         Route::post('/certificates/{intern}/regenerate', [CertificateController::class, 'regenerate'])->name('certificates.regenerate');
