@@ -48,12 +48,12 @@
         </button>
     </div>
 
-    <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
-        <div class="grid grid-cols-[2.5fr_1fr_1fr_1fr_1.2fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
+    <div class="bg-white border border-dash-border rounded-xl overflow-hidden max-lg:overflow-x-auto">
+        <div class="grid max-lg:min-w-[680px] grid-cols-[2.5fr_1fr_1fr_1fr_1.2fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
             <div>Nama Divisi</div><div>Intern Aktif</div><div>Mentor</div><div>Status</div><div>Aksi</div>
         </div>
         @forelse ($divisions as $division)
-            <div class="grid grid-cols-[2.5fr_1fr_1fr_1fr_1.2fr] px-5 py-3.5 border-b border-dash-border-soft items-center {{ $division->is_active ? '' : 'bg-dash-thead' }}">
+            <div class="grid max-lg:min-w-[680px] grid-cols-[2.5fr_1fr_1fr_1fr_1.2fr] px-5 py-3.5 border-b border-dash-border-soft items-center {{ $division->is_active ? '' : 'bg-dash-thead' }}">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 {{ $division->is_active ? 'bg-dash-pill text-dash-navy' : 'bg-dash-bg text-dash-faint' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

@@ -53,14 +53,14 @@
             </button>
         </form>
 
-        <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
-            <div class="grid grid-cols-[28px_2.3fr_1.1fr_1.6fr_1.4fr_1.3fr_1.4fr_1fr_0.8fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide items-center">
+        <div class="bg-white border border-dash-border rounded-xl overflow-hidden max-lg:overflow-x-auto">
+            <div class="grid max-lg:min-w-[1000px] grid-cols-[28px_2.3fr_1.1fr_1.6fr_1.4fr_1.3fr_1.4fr_1fr_0.8fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide items-center">
                 <input type="checkbox" :checked="allSelected()" @change="toggleSelectAll($event.target.checked)" class="w-3.5 h-3.5 cursor-pointer" aria-label="Pilih semua">
                 <div>Nama</div><div>NIM</div><div>Institusi</div><div>Divisi</div><div>Mentor</div><div>Periode</div><div>Status</div><div>Aksi</div>
             </div>
             @forelse ($interns as $intern)
                 @php [$statusLabel, $statusColor, $statusBg] = \App\Support\Badge::internStatus($intern->status);@endphp
-                <div class="grid grid-cols-[28px_2.3fr_1.1fr_1.6fr_1.4fr_1.3fr_1.4fr_1fr_0.8fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
+                <div class="grid max-lg:min-w-[1000px] grid-cols-[28px_2.3fr_1.1fr_1.6fr_1.4fr_1.3fr_1.4fr_1fr_0.8fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
                     <input type="checkbox" :checked="selectedIds.includes('{{ $intern->id }}')" @change="toggleOne('{{ $intern->id }}', $event.target.checked)" class="w-3.5 h-3.5 cursor-pointer" aria-label="Pilih {{ $intern->full_name }}">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full text-white text-xs font-bold flex items-center justify-center flex-shrink-0" style="background:{{ \App\Support\Badge::avatarColor($intern->full_name) }}">{{ \App\Support\Badge::initials($intern->full_name) }}</div>
@@ -113,13 +113,13 @@
             </button>
         </div>
 
-        <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
-            <div class="grid grid-cols-[28px_2fr_1.1fr_1.6fr_1.4fr_1.4fr_1.4fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide items-center">
+        <div class="bg-white border border-dash-border rounded-xl overflow-hidden max-lg:overflow-x-auto">
+            <div class="grid max-lg:min-w-[880px] grid-cols-[28px_2fr_1.1fr_1.6fr_1.4fr_1.4fr_1.4fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide items-center">
                 <input type="checkbox" :checked="allSelected()" @change="toggleSelectAll($event.target.checked)" class="w-3.5 h-3.5 cursor-pointer" aria-label="Pilih semua">
                 <div>Nama</div><div>NIM</div><div>Institusi</div><div>Divisi Diajukan</div><div>Tanggal Daftar</div><div>Aksi</div>
             </div>
             @forelse ($pending as $intern)
-                <div class="grid grid-cols-[28px_2fr_1.1fr_1.6fr_1.4fr_1.4fr_1.4fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
+                <div class="grid max-lg:min-w-[880px] grid-cols-[28px_2fr_1.1fr_1.6fr_1.4fr_1.4fr_1.4fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
                     <input type="checkbox" :checked="selectedIds.includes('{{ $intern->id }}')" @change="toggleOne('{{ $intern->id }}', $event.target.checked)" class="w-3.5 h-3.5 cursor-pointer" aria-label="Pilih {{ $intern->full_name }}">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full text-white text-xs font-bold flex items-center justify-center flex-shrink-0" style="background:{{ \App\Support\Badge::avatarColor($intern->full_name) }}">{{ \App\Support\Badge::initials($intern->full_name) }}</div>
@@ -178,7 +178,7 @@
 
     {{-- Reject modal --}}
     <div x-show="showReject" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="showReject = false">
+        <div class="bg-white rounded-2xl w-[440px] max-w-[94vw] p-6.5" @click.outside="showReject = false">
             <div class="text-base font-extrabold text-dash-ink">Tolak Registrasi</div>
             <div class="text-[13px] text-dash-muted mt-1">Alasan wajib diisi untuk <span x-text="rejectName"></span>.</div>
             <form method="POST" :action="rejectAction">
@@ -194,7 +194,7 @@
 
     {{-- Add intern modal --}}
     <div x-show="showAdd" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-[560px] max-h-[88vh] overflow-auto p-6.5" @click.outside="showAdd = false">
+        <div class="bg-white rounded-2xl w-[560px] max-w-[94vw] max-h-[88vh] overflow-auto p-6.5" @click.outside="showAdd = false">
             <div class="text-base font-extrabold text-dash-ink mb-4.5">Tambah Intern Baru</div>
             <form method="POST" action="{{ route('interns.store') }}">
                 @csrf
@@ -269,7 +269,7 @@
 
     {{-- Bulk delete modal --}}
     <div x-show="showBulkDelete" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-[480px] max-h-[88vh] overflow-auto p-6.5" @click.outside="closeBulkDelete()">
+        <div class="bg-white rounded-2xl w-[480px] max-w-[94vw] max-h-[88vh] overflow-auto p-6.5" @click.outside="closeBulkDelete()">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -311,7 +311,7 @@
 
     {{-- Reset password modal --}}
     <div x-show="showResetPassword" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="closeResetPassword()">
+        <div class="bg-white rounded-2xl w-[440px] max-w-[94vw] p-6.5" @click.outside="closeResetPassword()">
             <template x-if="!resetResultPassword">
                 <div>
                     <div class="text-base font-extrabold text-dash-ink">Reset Password <span x-text="resetInternName"></span></div>
@@ -380,7 +380,7 @@
 
     {{-- Extend modal --}}
     <div x-show="showExtend" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="showExtend = false">
+        <div class="bg-white rounded-2xl w-[440px] max-w-[94vw] p-6.5" @click.outside="showExtend = false">
             <div class="text-base font-extrabold text-dash-ink">Perpanjang Masa Magang</div>
             <div class="text-[13px] text-dash-muted mt-1">Perpanjang masa magang <span class="font-bold text-dash-ink" x-text="detail?.name"></span></div>
             <form method="POST" :action="detail ? '{{ url('/interns') }}/' + detail.id + '/extend' : ''">
@@ -404,7 +404,7 @@
 
     {{-- Mark completed modal --}}
     <div x-show="showMarkCompleted" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="showMarkCompleted = false">
+        <div class="bg-white rounded-2xl w-[440px] max-w-[94vw] p-6.5" @click.outside="showMarkCompleted = false">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -428,7 +428,7 @@
 
     {{-- Mark failed modal --}}
     <div x-show="showMarkFailed" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="showMarkFailed = false">
+        <div class="bg-white rounded-2xl w-[440px] max-w-[94vw] p-6.5" @click.outside="showMarkFailed = false">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -457,7 +457,7 @@
 
     {{-- Detail modal --}}
     <div x-show="showDetail" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-[640px] max-h-[88vh] overflow-auto p-7" @click.outside="showDetail = false" x-show="detail">
+        <div class="bg-white rounded-2xl w-[640px] max-w-[94vw] max-h-[88vh] overflow-auto p-7" @click.outside="showDetail = false" x-show="detail">
             <template x-if="detail">
                 <div>
                     <div class="flex items-start justify-between">

@@ -4,15 +4,15 @@
 
 @section('content')
 @if ($view === 'list')
-    <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
-        <div class="grid grid-cols-[2.4fr_1.4fr_1.4fr_1.6fr_1fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
+    <div class="bg-white border border-dash-border rounded-xl overflow-hidden max-lg:overflow-x-auto">
+        <div class="grid max-lg:min-w-[720px] grid-cols-[2.4fr_1.4fr_1.4fr_1.6fr_1fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
             <div>Nama</div><div>Divisi</div><div>Periode Selesai</div><div>Status Evaluasi</div><div>Aksi</div>
         </div>
         @forelse ($interns as $intern)
             @php
                 $hasEval = $intern->evaluation !== null;
             @endphp
-            <div class="grid grid-cols-[2.4fr_1.4fr_1.4fr_1.6fr_1fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
+            <div class="grid max-lg:min-w-[720px] grid-cols-[2.4fr_1.4fr_1.4fr_1.6fr_1fr] px-5 py-3.5 border-b border-dash-border-soft items-center">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-full text-white text-xs font-bold flex items-center justify-center flex-shrink-0" style="background:{{ \App\Support\Badge::avatarColor($intern->full_name) }}">{{ \App\Support\Badge::initials($intern->full_name) }}</div>
                     <span class="text-[13.5px] font-bold text-dash-ink">{{ $intern->full_name }}</span>

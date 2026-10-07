@@ -40,22 +40,42 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
 </head>
-<body class="m-0 h-screen overflow-hidden bg-[#F5F7FA]" x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === '1' }" x-init="$watch('sidebarCollapsed', v => localStorage.setItem('sidebarCollapsed', v ? '1' : '0'))">
+<body class="m-0 h-screen overflow-hidden bg-[#F5F7FA]"
+      x-data="{
+          sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === '1',
+          mobileOpen: false,
+          isDesktop: window.matchMedia('(min-width: 1024px)').matches,
+          get collapsedView() { return this.sidebarCollapsed && this.isDesktop; },
+      }"
+      x-init="$watch('sidebarCollapsed', v => localStorage.setItem('sidebarCollapsed', v ? '1' : '0'));
+              window.matchMedia('(min-width: 1024px)').addEventListener('change', e => { isDesktop = e.matches; if (e.matches) mobileOpen = false; });"
+      @keydown.escape.window="mobileOpen = false">
 <div class="flex h-screen w-full overflow-hidden bg-[#F5F7FA]">
+
+    {{-- Mobile drawer overlay (below lg only) --}}
+    <div x-show="mobileOpen" x-cloak x-transition.opacity @click="mobileOpen = false" class="fixed inset-0 z-30 bg-[rgba(16,24,40,0.5)] lg:hidden"></div>
 
     {{-- Sidebar — h-screen + flex-col so the nav (flex-1, its own overflow-y-auto)
          is the only part that ever scrolls; the logo header and Logout button
          stay pinned to the top/bottom of the viewport no matter how tall the
          nav list gets. --}}
     <div
-        class="flex-shrink-0 h-screen bg-white border-r border-dash-border flex flex-col py-5 transition-[width] duration-150 ease-in-out"
-        :class="sidebarCollapsed ? 'w-[76px] px-2' : 'w-[232px] px-3.5'"
+        class="fixed inset-y-0 left-0 z-40 lg:static lg:z-auto flex-shrink-0 h-screen bg-white border-r border-dash-border flex flex-col py-5 transition-[width,transform] duration-150 ease-in-out"
+        :class="[mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0', collapsedView ? 'w-[76px] px-2' : 'w-[232px] px-3.5']"
     >
-        <div class="flex-shrink-0 flex items-center justify-between px-2 pb-5" :class="sidebarCollapsed && 'justify-center'">
-            <img src="{{ asset('images/dashboard-logo.png') }}" alt="Logistax" class="h-6.5 block" x-show="!sidebarCollapsed">
+        <div class="flex-shrink-0 flex items-center justify-between px-2 pb-5" :class="collapsedView && 'justify-center'">
+            <img src="{{ asset('images/dashboard-logo.png') }}" alt="Logistax" class="h-6.5 block" x-show="!collapsedView">
+            <button
+                type="button"
+                @click="mobileOpen = false"
+                class="lg:hidden w-8 h-8 rounded-md flex items-center justify-center text-dash-slate hover:bg-dash-bg cursor-pointer border-0 bg-transparent flex-shrink-0"
+                aria-label="Tutup menu"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
             <button
                 @click="sidebarCollapsed = !sidebarCollapsed"
-                class="w-7 h-7 rounded-md flex items-center justify-center text-dash-slate hover:bg-dash-bg cursor-pointer border-0 bg-transparent flex-shrink-0"
+                class="hidden lg:flex w-7 h-7 rounded-md items-center justify-center text-dash-slate hover:bg-dash-bg cursor-pointer border-0 bg-transparent flex-shrink-0"
                 :title="sidebarCollapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" :class="sidebarCollapsed && 'rotate-180'" viewBox="0 0 20 20" fill="none">
@@ -106,13 +126,14 @@
                 <a
                     href="{{ route($item['route']) }}"
                     class="flex items-center gap-2.5 py-2.5 px-3 rounded-lg no-underline border-l-[3px] {{ $item['active'] ? 'bg-dash-pill border-dash-teal' : 'border-transparent hover:bg-dash-bg' }}"
-                    :class="sidebarCollapsed && 'justify-center px-0'"
+                    :class="collapsedView && 'justify-center px-0'"
+                    @click="mobileOpen = false"
                     title="{{ $item['label'] }}"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] flex-shrink-0 {{ $item['active'] ? 'text-dash-navy' : 'text-dash-faint' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                         {!! $item['icon'] !!}
                     </svg>
-                    <span class="text-sm {{ $item['active'] ? 'font-bold text-dash-navy' : 'font-semibold text-dash-slate' }}" x-show="!sidebarCollapsed">{{ $item['label'] }}</span>
+                    <span class="text-sm {{ $item['active'] ? 'font-bold text-dash-navy' : 'font-semibold text-dash-slate' }}" x-show="!collapsedView">{{ $item['label'] }}</span>
                 </a>
             @endforeach
         </nav>
@@ -120,11 +141,11 @@
         <div class="flex-shrink-0 pt-4 border-t border-dash-border">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-lg border-0 bg-transparent cursor-pointer hover:bg-dash-bg" :class="sidebarCollapsed && 'justify-center px-0'" title="Logout">
+                <button type="submit" class="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-lg border-0 bg-transparent cursor-pointer hover:bg-dash-bg" :class="collapsedView && 'justify-center px-0'" title="Logout">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] flex-shrink-0 text-dash-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                     </svg>
-                    <span class="text-sm font-semibold text-dash-slate" x-show="!sidebarCollapsed">Logout</span>
+                    <span class="text-sm font-semibold text-dash-slate" x-show="!collapsedView">Logout</span>
                 </button>
             </form>
         </div>
@@ -133,9 +154,14 @@
     {{-- Main column --}}
     <div class="flex-1 min-w-0 h-screen flex flex-col overflow-hidden">
         {{-- Topbar --}}
-        <div class="h-16 flex-shrink-0 bg-white border-b border-dash-border flex items-center justify-between px-7">
-            <div class="text-lg font-extrabold text-dash-ink">@yield('title', 'Dashboard')</div>
-            <div class="flex items-center gap-4">
+        <div class="h-16 flex-shrink-0 bg-white border-b border-dash-border flex items-center justify-between gap-2 px-4 lg:px-7">
+            <div class="flex items-center gap-2 min-w-0">
+                <button type="button" @click="mobileOpen = true" class="lg:hidden w-9 h-9 -ml-1 rounded-lg flex items-center justify-center text-dash-slate hover:bg-dash-bg cursor-pointer border-0 bg-transparent flex-shrink-0" aria-label="Buka menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" /></svg>
+                </button>
+                <div class="text-base lg:text-lg font-extrabold text-dash-ink truncate">@yield('title', 'Dashboard')</div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                 @auth('web')
                     @php($admin = auth('web')->user())
                     <div x-data="bellNotif()" x-init="start()" class="relative" @click.outside="open = false">
@@ -147,7 +173,7 @@
                                 <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center leading-none" x-text="total > 9 ? '9+' : total"></span>
                             </template>
                         </button>
-                        <div x-show="open" x-cloak x-transition class="absolute right-0 top-11 w-[320px] bg-white border border-dash-border rounded-xl shadow-lg z-50 overflow-hidden">
+                        <div x-show="open" x-cloak x-transition class="fixed left-4 right-4 top-[68px] sm:absolute sm:left-auto sm:right-0 sm:top-11 sm:w-[320px] max-h-[70vh] overflow-y-auto bg-white border border-dash-border rounded-xl shadow-lg z-50">
                             <div class="px-4 py-3 border-b border-dash-border">
                                 <div class="text-[13px] font-bold text-dash-ink">Notifikasi</div>
                             </div>
@@ -162,7 +188,21 @@
                             </template>
                         </div>
                     </div>
-                    <a href="{{ route('profile.show') }}" class="flex items-center gap-2.5 border-l border-dash-border pl-4 no-underline hover:opacity-80" title="Profil">
+                    <div x-data="{ open: false }" class="relative lg:hidden" @click.outside="open = false" @keydown.escape.window="open = false">
+                        <button type="button" @click="open = !open" :aria-expanded="open" aria-label="Menu pengguna" class="w-9 h-9 rounded-full bg-dash-navy text-white flex items-center justify-center text-[13px] font-bold border-0 cursor-pointer">{{ $admin->initials() }}</button>
+                        <div x-show="open" x-cloak x-transition class="absolute right-0 top-11 w-56 bg-white border border-dash-border rounded-xl shadow-lg z-50 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-dash-border">
+                                <div class="text-[13.5px] font-bold text-dash-ink truncate">{{ $admin->name }}</div>
+                                <div class="text-[11px] font-bold text-dash-navy bg-dash-pill px-2 py-px rounded-md inline-block mt-1">{{ $admin->roleLabel() }}</div>
+                            </div>
+                            <a href="{{ route('profile.show') }}" class="block px-4 py-3 text-[13.5px] font-semibold text-dash-ink no-underline hover:bg-dash-bg">Profil Saya</a>
+                            <form method="POST" action="{{ route('logout') }}" class="border-t border-dash-border-soft">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-3 text-[13.5px] font-semibold text-red-600 bg-transparent border-0 cursor-pointer hover:bg-dash-bg">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                    <a href="{{ route('profile.show') }}" class="hidden lg:flex items-center gap-2.5 border-l border-dash-border pl-4 no-underline hover:opacity-80" title="Profil">
                         <div class="w-9 h-9 rounded-full bg-dash-navy text-white flex items-center justify-center text-[13px] font-bold flex-shrink-0">
                             {{ $admin->initials() }}
                         </div>
@@ -178,7 +218,7 @@
         </div>
 
         {{-- Page content --}}
-        <div class="flex-1 min-h-0 p-7 overflow-auto">
+        <div class="flex-1 min-h-0 p-4 lg:p-7 overflow-auto">
             @if (session('status'))
                 <div class="mb-4 px-4 py-3 rounded-lg bg-green-50 text-green-700 text-sm font-semibold border border-green-200">
                     {{ session('status') }}

@@ -48,12 +48,12 @@
         </button>
     </div>
 
-    <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
-        <div class="grid grid-cols-[2fr_1.5fr_1.2fr_1fr_1.2fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
+    <div class="bg-white border border-dash-border rounded-xl overflow-hidden max-lg:overflow-x-auto">
+        <div class="grid max-lg:min-w-[760px] grid-cols-[2fr_1.5fr_1.2fr_1fr_1.2fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
             <div>Nama</div><div>Email</div><div>Divisi</div><div>Intern Aktif</div><div>Aksi</div>
         </div>
         @forelse ($mentors as $mentor)
-            <div class="grid grid-cols-[2fr_1.5fr_1.2fr_1fr_1.2fr] px-5 py-3.5 border-b border-dash-border-soft items-center {{ $mentor->is_active ? '' : 'bg-dash-thead' }}">
+            <div class="grid max-lg:min-w-[760px] grid-cols-[2fr_1.5fr_1.2fr_1fr_1.2fr] px-5 py-3.5 border-b border-dash-border-soft items-center {{ $mentor->is_active ? '' : 'bg-dash-thead' }}">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-full text-white text-xs font-bold flex items-center justify-center flex-shrink-0" style="background:{{ \App\Support\Badge::avatarColor($mentor->name) }}">{{ $mentor->initials() }}</div>
                     <span class="text-[13.5px] font-bold {{ $mentor->is_active ? 'text-dash-ink' : 'text-dash-muted' }}">{{ $mentor->name }}</span>

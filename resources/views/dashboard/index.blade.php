@@ -3,7 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="grid grid-cols-4 gap-4.5">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4.5">
     <div class="bg-white border border-dash-border rounded-xl p-5">
         <div class="text-[12.5px] font-semibold text-dash-muted">Total Intern Aktif</div>
         <div class="text-[30px] font-extrabold text-dash-ink mt-2">{{ $statActive }}</div>
@@ -31,7 +31,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-[2fr_1fr] gap-4.5 mt-5">
+<div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4.5 mt-5">
     <div class="bg-white border border-dash-border rounded-xl p-5.5">
         <div class="text-[14.5px] font-bold text-dash-ink mb-4.5">Tren Kehadiran — 7 Hari Terakhir</div>
         <div style="height:180px;" class="relative">
@@ -67,6 +67,7 @@
 
 <div class="bg-white border border-dash-border rounded-xl p-5.5 mt-5">
     <div class="text-[14.5px] font-bold text-dash-ink mb-3.5">Intern Perlu Perhatian</div>
+    <div class="max-lg:overflow-x-auto"><div class="max-lg:min-w-[560px]">
     <div class="grid grid-cols-[2fr_1.3fr_2fr_1.2fr] px-1 pb-2.5 border-b border-dash-border text-xs font-bold text-dash-faint uppercase tracking-wide">
         <div>Nama</div><div>Divisi</div><div>Isu</div><div>Tanggal</div>
     </div>
@@ -84,6 +85,7 @@
             'description' => 'Tidak ada intern yang perlu perhatian khusus saat ini.',
         ])
     @endforelse
+    </div></div>
 </div>
 
 <script>

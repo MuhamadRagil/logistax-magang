@@ -11,7 +11,7 @@
             </div>
             <div>
                 <div class="text-lg font-extrabold text-dash-ink">{{ $admin->name }}</div>
-                <div class="text-[13px] text-dash-muted">{{ $admin->email }}</div>
+                <div class="text-[13px] text-dash-muted break-all">{{ $admin->email }}</div>
             </div>
         </div>
 
@@ -26,7 +26,7 @@
             </div>
             <div class="col-span-2">
                 <div class="text-[11.5px] font-bold text-dash-faint uppercase">Email</div>
-                <div class="text-[13.5px] text-dash-ink mt-1 font-semibold">{{ $admin->email }}</div>
+                <div class="text-[13.5px] text-dash-ink mt-1 font-semibold break-all">{{ $admin->email }}</div>
             </div>
         </div>
 

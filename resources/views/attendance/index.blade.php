@@ -91,7 +91,7 @@
     @else
         <div class="flex flex-col gap-3.5">
             @forelse ($approvals as $a)
-                <div class="bg-white border border-dash-border rounded-xl px-5 py-4.5 flex items-center gap-4.5">
+                <div class="bg-white border border-dash-border rounded-xl px-4 lg:px-5 py-4.5 flex flex-wrap items-center gap-4.5">
                     <div class="w-15 h-15 rounded-lg flex-shrink-0 flex items-center justify-center text-center overflow-hidden bg-[repeating-linear-gradient(45deg,#F0F2F6,#F0F2F6_6px,#E4E9F2_6px,#E4E9F2_12px)]">
                         @if ($a->proof_file_url)
                             <a href="{{ $a->proof_file_url }}" target="_blank" class="text-[8px] text-dash-navy font-bold no-underline">LIHAT<br>BUKTI</a>
@@ -99,7 +99,7 @@
                             <span class="text-[8px] text-dash-faint">TANPA<br>BUKTI</span>
                         @endif
                     </div>
-                    <div class="flex-1">
+                    <div class="flex-1 min-w-[200px]">
                         <div class="text-sm font-bold text-dash-ink">{{ $a->intern->full_name ?? '—' }} <span class="font-semibold text-dash-muted text-[12.5px]">· {{ $a->intern?->division?->name ?? '—' }}</span></div>
                         <div class="text-[12.5px] text-dash-muted mt-0.5">Pengajuan <span class="font-bold {{ $a->status === 'sakit' ? 'text-amber-700' : 'text-blue-700' }}">{{ ucfirst($a->status) }}</span> — {{ $a->date->format('d M Y') }}</div>
                         @if ($a->notes)
@@ -127,7 +127,7 @@
     @endif
 
     <div x-show="showReject" x-cloak class="fixed inset-0 bg-[rgba(16,24,40,0.5)] flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-[440px] p-6.5" @click.outside="showReject = false">
+        <div class="bg-white rounded-2xl w-[440px] max-w-[94vw] p-6.5" @click.outside="showReject = false">
             <div class="text-base font-extrabold text-dash-ink">Tolak Pengajuan</div>
             <div class="text-[13px] text-dash-muted mt-1">Alasan penolakan akan digabung ke catatan intern.</div>
             <form method="POST" :action="rejectAction">

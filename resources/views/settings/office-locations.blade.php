@@ -68,8 +68,8 @@
         <div x-ref="overviewMap" class="isolate h-[340px] rounded-lg border border-dash-border-soft overflow-hidden"></div>
     </div>
 
-    <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
-        <div class="grid grid-cols-[2fr_1.2fr_1.2fr_0.9fr_0.9fr_1.6fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
+    <div class="bg-white border border-dash-border rounded-xl overflow-hidden max-lg:overflow-x-auto">
+        <div class="grid max-lg:min-w-[820px] grid-cols-[2fr_1.2fr_1.2fr_0.9fr_0.9fr_1.6fr] px-5 py-3.5 bg-dash-thead border-b border-dash-border text-[11.5px] font-bold text-dash-faint uppercase tracking-wide">
             <div>Nama</div><div>Latitude</div><div>Longitude</div><div>Radius</div><div>Status</div><div>Aksi</div>
         </div>
         @forelse ($locations as $location)
@@ -79,7 +79,7 @@
                     ? "\"{$location->name}\" adalah lokasi aktif terakhir. Jika dinonaktifkan, tidak ada lokasi aktif lagi dan SEMUA absensi (check-in) intern akan ditolak. Tetap nonaktifkan?"
                     : "Nonaktifkan lokasi \"{$location->name}\"? Check-in di radius lokasi ini tidak akan diterima lagi.";
             @endphp
-            <div class="grid grid-cols-[2fr_1.2fr_1.2fr_0.9fr_0.9fr_1.6fr] px-5 py-3.5 border-b border-dash-border-soft items-center {{ $location->is_active ? '' : 'bg-dash-thead' }}">
+            <div class="grid max-lg:min-w-[820px] grid-cols-[2fr_1.2fr_1.2fr_0.9fr_0.9fr_1.6fr] px-5 py-3.5 border-b border-dash-border-soft items-center {{ $location->is_active ? '' : 'bg-dash-thead' }}">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 {{ $location->is_active ? 'bg-dash-pill text-dash-navy' : 'bg-dash-bg text-dash-faint' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
