@@ -18,14 +18,21 @@
             btn.disabled = true;
             btn.innerHTML = '<svg class="animate-spin w-4 h-4 inline-block mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Memproses...';
         };
-        const unlockAll = () => {
-            originals.forEach((orig, btn) => { btn.innerHTML = orig.html; btn.disabled = orig.disabled; });
-            originals.clear();
+        const unlock = (btn) => {
+            const orig = originals.get(btn);
+            if (!orig) return;
+            btn.innerHTML = orig.html;
+            btn.disabled = orig.disabled;
+            originals.delete(btn);
         };
+        const unlockAll = () => [...originals.keys()].forEach(unlock);
         document.addEventListener('submit', (e) => {
             const form = e.target;
-            if (form.tagName !== 'FORM' || form.method.toUpperCase() === 'GET') return;
-            form.querySelectorAll('button[type="submit"]').forEach(lock);
+            if (form.tagName !== 'FORM' || form.method.toUpperCase() === 'GET' || e.defaultPrevented) return;
+            const buttons = [...form.querySelectorAll('button[type="submit"]')];
+            buttons.forEach(lock);
+            // Listeners that run after this one (e.g. confirm() cancelled late) can still cancel the submit.
+            setTimeout(() => { if (e.defaultPrevented) buttons.forEach(unlock); }, 0);
         });
         window.addEventListener('pageshow', (e) => { if (e.persisted) unlockAll(); });
     })();
