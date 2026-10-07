@@ -56,7 +56,12 @@
 
         <div class="bg-white border border-dash-border rounded-xl p-5 overflow-x-auto">
             @if (count($rekapRows) === 0)
-                <div class="py-8 text-center text-sm text-dash-muted">Tidak ada intern pada filter ini.</div>
+                @include('partials.empty-state', [
+                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />',
+                    'title' => 'Tidak ada hasil',
+                    'description' => 'Tidak ada intern pada filter ini.',
+                    'resetUrl' => route('attendance.index', ['tab' => 'rekap']),
+                ])
             @else
                 <div class="flex" style="min-width:{{ 170 + $daysInMonth * 24 }}px;">
                     <div class="w-[170px] flex-shrink-0">
@@ -109,7 +114,13 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white border border-dash-border rounded-xl py-10 text-center text-sm text-dash-muted">Tidak ada pengajuan yang menunggu approval.</div>
+                <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
+                    @include('partials.empty-state', [
+                        'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />',
+                        'title' => 'Semua sudah diproses',
+                        'description' => 'Tidak ada pengajuan yang menunggu approval.',
+                    ])
+                </div>
             @endforelse
         </div>
     @endif

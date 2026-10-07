@@ -90,7 +90,12 @@
                     </div>
                 </div>
             @empty
-                <div class="py-10 text-center text-sm text-dash-muted">Tidak ada intern yang cocok dengan filter ini.</div>
+                @include('partials.empty-state', [
+                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />',
+                    'title' => 'Tidak ada hasil',
+                    'description' => 'Tidak ada intern yang cocok dengan filter ini.',
+                    'resetUrl' => route('interns.index', ['tab' => 'list']),
+                ])
             @endforelse
         </div>
 
@@ -159,7 +164,11 @@
                     </div>
                 </div>
             @empty
-                <div class="py-10 text-center text-sm text-dash-muted">Tidak ada registrasi yang menunggu persetujuan.</div>
+                @include('partials.empty-state', [
+                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />',
+                    'title' => 'Tidak ada pending',
+                    'description' => 'Tidak ada registrasi yang menunggu persetujuan.',
+                ])
             @endforelse
         </div>
     @endif

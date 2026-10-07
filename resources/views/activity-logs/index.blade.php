@@ -34,7 +34,16 @@
 
     <div class="bg-white border border-dash-border rounded-xl overflow-hidden">
         @if ($logs->isEmpty())
-            <div class="px-5 py-12 text-center text-dash-faint text-sm">Belum ada riwayat aktivitas.</div>
+            @include('partials.empty-state', [
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />',
+                'title' => 'Belum ada aktivitas',
+                'description' => request()->hasAny(['date_from', 'date_to', 'action', 'actor_id'])
+                    ? 'Tidak ada riwayat aktivitas untuk filter ini.'
+                    : 'Belum ada riwayat aktivitas.',
+                'resetUrl' => request()->hasAny(['date_from', 'date_to', 'action', 'actor_id'])
+                    ? route('activity-logs.index')
+                    : null,
+            ])
         @else
             <div class="overflow-x-auto">
                 <table class="w-full text-[13.5px]">

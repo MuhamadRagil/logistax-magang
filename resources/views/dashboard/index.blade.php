@@ -34,8 +34,18 @@
 <div class="grid grid-cols-[2fr_1fr] gap-4.5 mt-5">
     <div class="bg-white border border-dash-border rounded-xl p-5.5">
         <div class="text-[14.5px] font-bold text-dash-ink mb-4.5">Tren Kehadiran — 7 Hari Terakhir</div>
-        <div style="height:180px;">
-            <canvas id="attendanceTrendChart"></canvas>
+        <div style="height:180px;" class="relative">
+            <div id="chartSkeleton" class="absolute inset-0 flex items-end gap-3 px-4 pb-4">
+                @for ($i = 0; $i < 7; $i++)
+                    <div class="flex-1 rounded-t-md bg-dash-bg" style="height:{{ rand(30, 90) }}%; animation: pulse 1.5s ease-in-out infinite;"></div>
+                @endfor
+            </div>
+            <canvas id="attendanceTrendChart" class="relative"></canvas>
+            @if (collect($attendanceTrend)->every(fn ($d) => $d['count'] === 0))
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-[13px] text-dash-faint font-semibold">Belum ada data kehadiran</div>
+                </div>
+            @endif
         </div>
     </div>
     <div class="bg-white border border-dash-border rounded-xl p-5.5 flex flex-col gap-3">
@@ -68,7 +78,11 @@
             <div class="text-[13px] text-dash-muted">{{ $row['dateLabel'] }}</div>
         </div>
     @empty
-        <div class="py-8 text-center text-sm text-dash-muted">Tidak ada intern yang perlu perhatian khusus saat ini.</div>
+        @include('partials.empty-state', [
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />',
+            'title' => 'Semua baik',
+            'description' => 'Tidak ada intern yang perlu perhatian khusus saat ini.',
+        ])
     @endforelse
 </div>
 
@@ -76,6 +90,8 @@
     document.addEventListener('DOMContentLoaded', () => {
         const trend = @json($attendanceTrend);
         const ctx = document.getElementById('attendanceTrendChart');
+        const skeleton = document.getElementById('chartSkeleton');
+        if (skeleton) skeleton.remove();
         new Chart(ctx, {
             type: 'bar',
             data: {
