@@ -41,6 +41,8 @@ class ActivityLogController extends Controller
             'logs' => $logs,
             'actors' => $actors,
             'actions' => self::ACTION_LABELS,
+            'hasFilters' => $request->filled('date_from') || $request->filled('date_to') || $request->filled('action') || $request->filled('actor_id'),
+            'totalLogs' => ActivityLog::query()->count(),
         ]);
     }
 

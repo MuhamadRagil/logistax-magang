@@ -36,13 +36,10 @@
         @if ($logs->isEmpty())
             @include('partials.empty-state', [
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />',
+                'filtered' => $hasFilters && $totalLogs > 0,
                 'title' => 'Belum ada aktivitas',
-                'description' => request()->hasAny(['date_from', 'date_to', 'action', 'actor_id'])
-                    ? 'Tidak ada riwayat aktivitas untuk filter ini.'
-                    : 'Belum ada riwayat aktivitas.',
-                'resetUrl' => request()->hasAny(['date_from', 'date_to', 'action', 'actor_id'])
-                    ? route('activity-logs.index')
-                    : null,
+                'description' => 'Aksi penting admin akan tercatat di sini secara otomatis.',
+                'resetUrl' => route('activity-logs.index'),
             ])
         @else
             <div class="overflow-x-auto">

@@ -70,6 +70,8 @@ class InternController extends Controller
             'activeTab' => $request->query('tab', 'list'),
             'openAdd' => $request->query('action') === 'add',
             'isAdminMagang' => $admin->role === 'admin_magang',
+            'hasFilters' => $request->filled('search') || $request->filled('status') || $request->filled('division_id') || $request->filled('institution'),
+            'totalInterns' => Intern::query()->when($admin->role === 'spv_mentor', fn ($q) => $q->where('mentor_id', $admin->id))->count(),
         ]);
     }
 

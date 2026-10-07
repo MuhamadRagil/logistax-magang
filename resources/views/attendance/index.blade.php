@@ -58,8 +58,9 @@
             @if (count($rekapRows) === 0)
                 @include('partials.empty-state', [
                     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />',
-                    'title' => 'Tidak ada hasil',
-                    'description' => 'Tidak ada intern pada filter ini.',
+                    'filtered' => (request()->filled('division_id') || request()->filled('intern_id')) && count($internOptions) > 0,
+                    'title' => 'Belum ada data kehadiran',
+                    'description' => 'Rekap akan muncul di sini setelah ada intern yang terdaftar.',
                     'resetUrl' => route('attendance.index', ['tab' => 'rekap']),
                 ])
             @else

@@ -91,9 +91,12 @@
                 </div>
             @empty
                 @include('partials.empty-state', [
-                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />',
-                    'title' => 'Tidak ada hasil',
-                    'description' => 'Tidak ada intern yang cocok dengan filter ini.',
+                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />',
+                    'filtered' => $hasFilters && $totalInterns > 0,
+                    'title' => 'Belum ada intern',
+                    'description' => $isAdminMagang ? 'Tambahkan intern pertama untuk mulai mengelola program magang.' : 'Belum ada intern yang Anda bimbing.',
+                    'actionLabel' => $isAdminMagang ? '+ Tambah Intern' : null,
+                    'actionClick' => 'showAdd = true',
                     'resetUrl' => route('interns.index', ['tab' => 'list']),
                 ])
             @endforelse
@@ -166,8 +169,8 @@
             @empty
                 @include('partials.empty-state', [
                     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />',
-                    'title' => 'Tidak ada pending',
-                    'description' => 'Tidak ada registrasi yang menunggu persetujuan.',
+                    'title' => 'Tidak ada registrasi menunggu',
+                    'description' => 'Semua pendaftaran sudah diproses. Registrasi baru dari aplikasi mobile akan muncul di sini.',
                 ])
             @endforelse
         </div>
