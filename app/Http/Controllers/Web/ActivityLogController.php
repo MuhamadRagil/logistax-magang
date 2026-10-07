@@ -58,5 +58,7 @@ class ActivityLogController extends Controller
         'mentor.created' => 'Membuat mentor',
         'mentor.updated' => 'Mengubah mentor',
         'mentor.deleted' => 'Menghapus mentor',
+        'profile.updated' => 'Mengubah profil',
+        'profile.password_changed' => 'Mengubah password',
     ];
 }

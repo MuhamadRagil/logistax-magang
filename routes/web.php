@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\ActivityLogController;
 use App\Http\Controllers\Web\DivisionController;
 use App\Http\Controllers\Web\MentorController;
 use App\Http\Controllers\Web\OfficeLocationController;
+use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,11 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 
 Route::middleware(['auth:web', 'admin.role.web:admin_magang,spv_mentor'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/notifications/counts', [DashboardController::class, 'notificationCounts'])->name('notifications.counts');
+
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::patch('/profile/name', [ProfileController::class, 'updateName'])->name('profile.update-name');
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
 
     // Interns — index/show/detail dibuka untuk admin_magang & spv_mentor
     // (di-scope ke mentee sendiri untuk spv_mentor), sama seperti API.
