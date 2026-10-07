@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Web;
 use App\Models\AdminUser;
 use App\Models\Attendance;
 use App\Models\Intern;
+use App\Services\NotificationCountService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
@@ -52,6 +54,11 @@ class DashboardController extends Controller
             'attendanceTrend' => $attendanceTrend,
             'needAttention' => $needAttention,
         ]);
+    }
+
+    public function notificationCounts(Request $request, NotificationCountService $service): JsonResponse
+    {
+        return response()->json($service->counts($request->user('web')));
     }
 
     /**
