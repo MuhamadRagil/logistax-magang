@@ -9,6 +9,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+    <script>
+    (function() {
+        const originals = new Map();
+        const lock = (btn) => {
+            if (originals.has(btn)) return;
+            originals.set(btn, { html: btn.innerHTML, disabled: btn.disabled });
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin w-4 h-4 inline-block mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Memproses...';
+        };
+        const unlockAll = () => {
+            originals.forEach((orig, btn) => { btn.innerHTML = orig.html; btn.disabled = orig.disabled; });
+            originals.clear();
+        };
+        document.addEventListener('submit', (e) => {
+            const form = e.target;
+            if (form.tagName !== 'FORM' || form.method.toUpperCase() === 'GET') return;
+            form.querySelectorAll('button[type="submit"]').forEach(lock);
+        });
+        window.addEventListener('pageshow', (e) => { if (e.persisted) unlockAll(); });
+    })();
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
 </head>
@@ -110,17 +131,31 @@
             <div class="flex items-center gap-4">
                 @auth('web')
                     @php($admin = auth('web')->user())
-                    <div class="relative cursor-pointer">
-                        <div class="w-9 h-9 rounded-full bg-dash-bg flex items-center justify-center">
+                    <div x-data="bellNotif()" x-init="start()" class="relative" @click.outside="open = false">
+                        <button @click="open = !open" class="w-9 h-9 rounded-full bg-dash-bg flex items-center justify-center border-0 cursor-pointer relative">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] text-dash-slate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                             </svg>
+                            <template x-if="total > 0">
+                                <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center leading-none" x-text="total > 9 ? '9+' : total"></span>
+                            </template>
+                        </button>
+                        <div x-show="open" x-cloak x-transition class="absolute right-0 top-11 w-[320px] bg-white border border-dash-border rounded-xl shadow-lg z-50 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-dash-border">
+                                <div class="text-[13px] font-bold text-dash-ink">Notifikasi</div>
+                            </div>
+                            <template x-if="items.length === 0">
+                                <div class="px-4 py-6 text-center text-[13px] text-dash-muted">Tidak ada notifikasi</div>
+                            </template>
+                            <template x-for="item in items" :key="item.key">
+                                <a :href="item.url" class="flex items-center gap-3 px-4 py-3 border-b border-dash-border-soft no-underline hover:bg-dash-bg">
+                                    <div class="w-8 h-8 rounded-full bg-red-100 text-red-700 flex items-center justify-center flex-shrink-0 text-[12px] font-bold" x-text="item.count"></div>
+                                    <div class="text-[13px] text-dash-ink" x-text="item.label"></div>
+                                </a>
+                            </template>
                         </div>
-                        @if ($hasPendingNotifications ?? false)
-                            <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-600 border-[1.5px] border-white"></div>
-                        @endif
                     </div>
-                    <div class="flex items-center gap-2.5 border-l border-dash-border pl-4">
+                    <a href="{{ route('profile.show') }}" class="flex items-center gap-2.5 border-l border-dash-border pl-4 no-underline hover:opacity-80" title="Profil">
                         <div class="w-9 h-9 rounded-full bg-dash-navy text-white flex items-center justify-center text-[13px] font-bold flex-shrink-0">
                             {{ $admin->initials() }}
                         </div>
@@ -130,7 +165,7 @@
                                 {{ $admin->roleLabel() }}
                             </div>
                         </div>
-                    </div>
+                    </a>
                 @endauth
             </div>
         </div>
@@ -151,5 +186,26 @@
         </div>
     </div>
 </div>
+<script>
+function bellNotif() {
+    return {
+        open: false, total: 0, items: [], _timer: null,
+        start() {
+            this.fetch();
+            this._timer = setInterval(() => { if (!document.hidden) this.fetch(); }, 60000);
+        },
+        async fetch() {
+            try {
+                const r = await fetch('{{ route("notifications.counts") }}', { headers: { Accept: 'application/json' } });
+                if (!r.ok) return;
+                const d = await r.json();
+                this.total = d.total;
+                this.items = d.items;
+            } catch {}
+        },
+        destroy() { clearInterval(this._timer); }
+    };
+}
+</script>
 </body>
 </html>
