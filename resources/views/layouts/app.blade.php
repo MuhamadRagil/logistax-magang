@@ -236,10 +236,12 @@
 <script>
 function bellNotif() {
     return {
-        open: false, total: 0, items: [], _timer: null,
+        open: false, total: 0, items: [], _timer: null, _onVisible: null,
         start() {
             this.fetch();
             this._timer = setInterval(() => { if (!document.hidden) this.fetch(); }, 60000);
+            this._onVisible = () => { if (!document.hidden) this.fetch(); };
+            document.addEventListener('visibilitychange', this._onVisible);
         },
         async fetch() {
             try {
@@ -250,7 +252,10 @@ function bellNotif() {
                 this.items = d.items;
             } catch {}
         },
-        destroy() { clearInterval(this._timer); }
+        destroy() {
+            clearInterval(this._timer);
+            document.removeEventListener('visibilitychange', this._onVisible);
+        }
     };
 }
 </script>

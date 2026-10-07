@@ -91,4 +91,17 @@ class NotificationCountTest extends TestCase
             ->assertJsonPath('total', 0)
             ->assertJsonCount(0, 'items');
     }
+
+    public function test_labels_do_not_repeat_the_count(): void
+    {
+        Intern::factory()->create(['status' => 'pending', 'division_id' => $this->division->id, 'mentor_id' => $this->spv->id]);
+
+        $items = $this->actingAs($this->admin, 'web')->getJson('/notifications/counts')->assertOk()->json('items');
+
+        $this->assertNotEmpty($items);
+        foreach ($items as $item) {
+            $this->assertDoesNotMatchRegularExpression('/\d/', $item['label']);
+            $this->assertGreaterThan(0, $item['count']);
+        }
+    }
 }

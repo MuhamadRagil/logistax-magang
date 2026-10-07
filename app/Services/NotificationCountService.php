@@ -20,7 +20,7 @@ class NotificationCountService
                 $items[] = [
                     'key' => 'pending_intern',
                     'count' => $pending,
-                    'label' => "{$pending} registrasi menunggu approval",
+                    'label' => 'registrasi menunggu approval',
                     'url' => route('interns.index', ['tab' => 'pending']),
                 ];
             }
@@ -34,7 +34,7 @@ class NotificationCountService
             $items[] = [
                 'key' => 'pending_attendance',
                 'count' => $approvalCount,
-                'label' => "{$approvalCount} absensi menunggu approval",
+                'label' => 'absensi menunggu approval',
                 'url' => route('attendance.index', ['tab' => 'approval']),
             ];
         }
@@ -53,7 +53,7 @@ class NotificationCountService
                 $items[] = [
                     'key' => 'ready_certificate',
                     'count' => $readyCount,
-                    'label' => "{$readyCount} sertifikat siap diterbitkan",
+                    'label' => 'sertifikat siap diterbitkan',
                     'url' => route('certificates.index', ['tab' => 'cert']),
                 ];
             }
